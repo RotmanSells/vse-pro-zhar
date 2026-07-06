@@ -1749,6 +1749,11 @@ function closeCheckout(){
   document.body.style.overflow="";
 }
 
+function finishOrder(){
+  closeCheckout();
+  showScreen("profile");
+}
+
 // Рендер формы оформления
 function renderCheckoutForm(){
   const rawSum = state.cart.reduce((s,it)=>{const d=DISHES.find(x=>x.id===it.id);return s+(d?d.price*it.qty:0);},0);
@@ -1889,9 +1894,10 @@ function confirmCheckout(){
     ? {type:"delivery", address:state.deliveryAddress, building:state.deliveryBuilding, apartment:state.deliveryApartment, entrance:state.deliveryEntrance, floor:state.deliveryFloor, intercom:state.deliveryIntercom}
     : {type:"pickup", pointId:state.pickupPointId, pointName:PICKUP_POINTS.find(p=>p.id===state.pickupPointId)?.name||""};
 
+  const orderId = Date.now();
   if(!state.orderHistory) state.orderHistory = [];
   state.orderHistory.unshift({
-    id:Date.now(),
+    id:orderId,
     items:state.cart.map(it=>{const d=DISHES.find(x=>x.id===it.id);return{name:d.name,qty:it.qty,price:d.price};}),
     total:total,
     date:new Date().toISOString(),
@@ -1908,12 +1914,63 @@ function confirmCheckout(){
   saveState();
   updateCounters();
   renderPassport();
-  closeCheckout();
 
+  // Показываем экран подтверждения
+  showOrderConfirmed(orderId, total, coalEarn, isDelivery, deliveryInfo);
+}
+
+function showOrderConfirmed(orderId, total, coalEarn, isDelivery, deliveryInfo){
   const timeLabel = state.deliveryTime==="asap"?"Как можно скорее":state.deliveryTime;
-  const where = isDelivery ? `Доставка: ${state.deliveryAddress}` : `Самовывоз: ${PICKUP_POINTS.find(p=>p.id===state.pickupPointId)?.name||""}`;
-  showToast(`🎉 Заказ оформлен! ${where}. Время: ${timeLabel}. +${coalEarn}🔥 +${Math.floor(total/10)}XP`, "success");
-  setTimeout(()=> showScreen("profile"), 900);
+  const where = isDelivery
+    ? `🚗 Доставка: ${deliveryInfo.address}${deliveryInfo.building?(', '+deliveryInfo.building):''}`
+    : `🚶 Самовывоз: ${deliveryInfo.pointName}`;
+  const when = state.deliveryTime==="asap"?"Как можно скорее":state.deliveryTime;
+  const shortId = "#"+String(orderId).slice(-6);
+
+  const body = $("#checkoutBody");
+  body.innerHTML = `
+    <div style="text-align:center;padding:20px 0 10px;">
+      <div style="font-size:72px;margin-bottom:12px;animation:bounce .8s;">🎉</div>
+      <h2 style="font-family:'Montserrat';font-weight:900;font-size:22px;
+        background:linear-gradient(90deg,var(--primary),var(--accent));
+        -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px;">
+        Заказ оформлен!
+      </h2>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:20px;">Заказ ${shortId}</div>
+
+      <div style="background:rgba(255,149,0,.06);border-radius:16px;padding:16px;text-align:left;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;">
+          <span>Сумма</span><span style="font-weight:700;">${formatPrice(total)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;">
+          <span>${isDelivery?'Адрес':'Точка'}</span><span style="font-weight:600;text-align:right;max-width:55%;">${where.split(": ")[1]}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;">
+          <span>Время</span><span style="font-weight:600;">${when}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;">
+          <span>Контакт</span><span style="font-weight:600;">${state.contactName}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-top:2px dashed #e8e2da;margin-top:4px;padding-top:10px;">
+          <span>Бонусы</span>
+          <span style="font-weight:700;color:var(--primary);">+${coalEarn} 🔥  +${Math.floor(total/10)} ⭐</span>
+        </div>
+      </div>
+
+      <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5;">
+        ${isDelivery
+          ? `Курьер свяжется с вами для уточнения времени доставки.`
+          : `Ждём вас в ${deliveryInfo.pointName}!`}
+      </div>
+
+      <button class="co-submit" onclick="finishOrder()" style="margin-top:0;">
+        Отлично! 🔥
+      </button>
+    </div>
+  `;
+
+  // Конфетти
+  launchConfetti();
 }
 
 /* ============================================================
