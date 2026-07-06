@@ -2119,27 +2119,32 @@ function renderPassport(){
   const rank = getRank();
   const idx = RANKS.indexOf(rank);
   const next = RANKS[idx+1];
-  $("#rankIcon").textContent = rank.icon;
-  $("#rankName").textContent = rank.name;
+  const ri=$("#rankIcon"),rn=$("#rankName"),xf=$("#xpFill"),rx=$("#rankXp"),nr=$("#nextRank"),qg=$("#questGrid");
+  if(!ri||!rn||!xf) return;
+  ri.textContent = rank.icon;
+  rn.textContent = rank.name;
 
   if(next){
     const floor = rank.min;
     const span = next.min - floor;
     const have = state.xp - floor;
     const pct = Math.min(100, (have/span)*100);
-    $("#xpFill").style.width = pct + "%";
-    $("#rankXp").textContent = state.xp;
-    document.querySelector(".rank-xp-text").innerHTML = `${state.xp} / ${next.min} XP`;
-    $("#nextRank").textContent = `До ранга «${next.name}» осталось ${Math.max(0,next.min-state.xp)} XP`;
+    xf.style.width = pct + "%";
+    if(rx) rx.textContent = state.xp;
+    const rxt = document.querySelector(".rank-xp-text");
+    if(rxt) rxt.innerHTML = `${state.xp} / ${next.min} XP`;
+    if(nr) nr.textContent = `До ранга «${next.name}» осталось ${Math.max(0,next.min-state.xp)} XP`;
   } else {
-    $("#xpFill").style.width = "100%";
-    $("#rankXp").textContent = state.xp;
-    document.querySelector(".rank-xp-text").innerHTML = `МАКСИМАЛЬНЫЙ РАНГ`;
-    $("#nextRank").textContent = `👑 Вы достигли вершины — Повелитель Жара!`;
+    xf.style.width = "100%";
+    if(rx) rx.textContent = state.xp;
+    const rxt = document.querySelector(".rank-xp-text");
+    if(rxt) rxt.innerHTML = `МАКСИМАЛЬНЫЙ РАНГ`;
+    if(nr) nr.textContent = `👑 Вы достигли вершины — Повелитель Жара!`;
   }
 
   // Квесты
-  $("#questGrid").innerHTML = QUESTS.map(q=>{
+  if(!qg) return;
+  qg.innerHTML = QUESTS.map(q=>{
     const progress = (state.questsProgress&&state.questsProgress[q.id])||0;
     const done = progress >= q.goal;
     const pct = Math.min(100, (progress/q.goal)*100);
