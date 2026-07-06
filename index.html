@@ -1861,7 +1861,7 @@ function renderCheckoutForm(){
 }
 
 function escHtml(s){return (s||"").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
-function setDeliveryType(t){state.deliveryType=t;saveState();if($("#cartContainer"))renderCart();if($("#checkoutBody").innerHTML)renderCheckoutForm();updateCounters();}
+function setDeliveryType(t){state.deliveryType=t;saveState();if($("#cartContainer"))renderCart();if($("#checkoutOverlay").classList.contains("show"))renderCheckoutForm();updateCounters();}
 function selectPickup(id){state.pickupPointId=id;saveState();renderCheckoutForm();}
 function selectTime(t){state.deliveryTime=t;saveState();renderCheckoutForm();}
 
@@ -1916,6 +1916,7 @@ function confirmCheckout(){
 
   // Показываем экран подтверждения
   showOrderConfirmed(orderId, total, coalEarn, isDelivery, deliveryInfo);
+  renderCart();
 }
 
 function showOrderConfirmed(orderId, total, coalEarn, isDelivery, deliveryInfo){
@@ -1948,7 +1949,7 @@ function showOrderConfirmed(orderId, total, coalEarn, isDelivery, deliveryInfo){
           <span>Время</span><span style="font-weight:600;">${when}</span>
         </div>
         <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;">
-          <span>Контакт</span><span style="font-weight:600;">${state.contactName}</span>
+          <span>Контакт</span><span style="font-weight:600;">${escHtml(state.contactName)}</span>
         </div>
         <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-top:2px dashed #e8e2da;margin-top:4px;padding-top:10px;">
           <span>Бонусы</span>
@@ -1959,7 +1960,7 @@ function showOrderConfirmed(orderId, total, coalEarn, isDelivery, deliveryInfo){
       <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5;">
         ${isDelivery
           ? `Курьер свяжется с вами для уточнения времени доставки.`
-          : `Ждём вас в ${deliveryInfo.pointName}!`}
+          : `Ждём вас в ${escHtml(deliveryInfo.pointName)}!`}
       </div>
 
       <button class="co-submit" onclick="finishOrder()" style="margin-top:0;">
@@ -1968,6 +1969,8 @@ function showOrderConfirmed(orderId, total, coalEarn, isDelivery, deliveryInfo){
     </div>
   `;
 
+  // Скролл наверх
+  $("#checkoutSheet").scrollTop = 0;
   // Конфетти
   launchConfetti();
 }
