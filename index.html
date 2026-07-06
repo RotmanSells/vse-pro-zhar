@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>🔥 Все Про Жар — гриль-ресторан</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+/* ============================================================
+   ОСНОВНЫЕ ПЕРЕМЕННЫЕ И СБРОС
+   ============================================================ */
+:root{
+  --primary:#ff5e3a;      /* огненно-оранжевый */
+  --secondary:#ff9500;    /* золотисто-оранжевый */
+  --bg-dark:#1a1a1a;      /* угольный чёрный */
+  --bg-light:#f9f7f4;     /* светлый беж */
+  --accent:#ff3333;       /* красный огонь */
+  --gold:#ffc83d;
+  --card:#ffffff;
+  --muted:#8a8580;
+  --border:#ece8e2;
+  --shadow:0 8px 24px rgba(0,0,0,.08);
+  --shadow-fire:0 8px 24px rgba(255,94,58,.35);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+button,.cat-chip,.dish-card,.tab,.add-btn,.spin-btn,.modal-btn,.checkout-btn,.bonus-cta,.logout-btn{
+  touch-action:manipulation;user-select:none;
+}
+html,body{height:100%;}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg-dark);
+  color:var(--bg-dark);
+  display:flex;
+  justify-content:center;
+  align-items:stretch;
+  min-height:100vh;
+}
+
+/* ============================================================
+   РАМКА ТЕЛЕФОНА (на десктопе по центру)
+   ============================================================ */
+.phone{
+  position:relative;
+  width:100%;
+  max-width:480px;
+  min-height:100vh;
+  background:var(--bg-light);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  box-shadow:0 0 60px rgba(0,0,0,.5);
+}
+
+/* Десктоп-рамка определена в секции АДАПТИВ внизу файла */
+
+/* ============================================================
+   ВЕРХНЯЯ ШАПКА
+   ============================================================ */
+.app-header{
+  background:linear-gradient(135deg,#1a1a1a 0%,#2a1810 60%,#3d1c08 100%);
+  color:#fff;
+  padding:18px 18px 16px;
+  position:sticky;
+  top:0;
+  overflow:hidden;
+  flex-shrink:0;
+  z-index:40;
+}
+/* угольки/искры фоном */
+.app-header::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image:
+    radial-gradient(circle at 20% 30%,rgba(255,149,0,.25),transparent 30%),
+    radial-gradient(circle at 80% 70%,rgba(255,51,51,.2),transparent 35%);
+  pointer-events:none;
+}
+.header-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:relative;
+  z-index:1;
+}
+.logo{
+  font-family:'Montserrat',sans-serif;
+  font-weight:900;
+  font-size:22px;
+  letter-spacing:-.5px;
+  background:linear-gradient(90deg,#ff9500,#ff5e3a);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.logo .flame{ -webkit-text-fill-color:initial; filter:drop-shadow(0 0 6px rgba(255,94,58,.6)); }
+
+/* Баланс угольков */
+.coal-balance{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  background:linear-gradient(135deg,rgba(255,149,0,.2),rgba(255,51,51,.2));
+  border:1px solid rgba(255,149,0,.4);
+  padding:7px 13px;
+  border-radius:30px;
+  font-weight:700;
+  font-size:15px;
+  backdrop-filter:blur(4px);
+}
+.coal-balance .icon{
+  font-size:16px;
+  animation:flicker 1.8s infinite ease-in-out;
+}
+.coal-balance .add{
+  font-size:11px;
+  color:var(--gold);
+  margin-left:4px;
+  cursor:pointer;
+}
+
+/* Анимация мерцания уголька */
+@keyframes flicker{
+  0%,100%{ transform:scale(1) rotate(-3deg); filter:hue-rotate(0deg);}
+  50%{ transform:scale(1.15) rotate(3deg); filter:hue-rotate(-15deg) brightness(1.3);}
+}
+
+/* ============================================================
+   ОБЛАСТЬ КОНТЕНТА (скроллится)
+   ============================================================ */
+.content{
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+}
+.content::-webkit-scrollbar{ width:0; }
+
+.screen{ display:none; animation:fadeIn .35s ease; }
+.screen.active{ display:block; }
+@keyframes fadeIn{
+  from{ opacity:0; transform:translateY(8px);}
+  to{ opacity:1; transform:translateY(0);}
+}
+
+/* ============================================================
+   ЭКРАН 1: МЕНЮ — Категории
+   ============================================================ */
+.categories{
+  display:flex;
+  gap:10px;
+  padding:16px 16px 8px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  -ms-overflow-style:none;scrollbar-width:none;
+}
+.categories::-webkit-scrollbar{ display:none; }
+.cat-chip{
+  flex:0 0 auto;
+  padding:10px 16px;
+  border-radius:14px;
+  background:#fff;
+  border:1.5px solid var(--border);
+  font-weight:600;
+  font-size:14px;
+  white-space:nowrap;
+  cursor:pointer;
+  scroll-snap-align:start;
+  transition:all .25s;
+  color:#5a544c;
+}
+.cat-chip.active{
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  color:#fff;
+  border-color:transparent;
+  box-shadow:var(--shadow-fire);
+  transform:translateY(-2px);
+}
+
+/* Промо-баннер */
+.promo{
+  margin:8px 16px 16px;
+  padding:18px 20px;
+  border-radius:20px;
+  background:linear-gradient(120deg,#ff5e3a,#ff9500,#ff3333);
+  background-size:200% 200%;
+  color:#fff;
+  position:relative;
+  overflow:hidden;
+  animation:gradientShift 6s ease infinite;
+  box-shadow:var(--shadow-fire);
+}
+@keyframes gradientShift{
+  0%,100%{ background-position:0% 50%; }
+  50%{ background-position:100% 50%; }
+}
+.promo h3{ font-family:'Montserrat';font-size:18px;font-weight:800; margin-bottom:4px;}
+.promo p{ font-size:13px;opacity:.95;}
+.promo .badge{
+  position:absolute;right:-10px;top:-10px;
+  font-size:60px;opacity:.25;transform:rotate(15deg);
+}
+
+/* Сетка блюд */
+.dish-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  padding:0 16px;
+}
+.dish-card{
+  background:var(--card);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  transition:transform .2s;
+}
+.dish-card:active{ transform:scale(.97); }
+.dish-img{
+  height:120px;
+  position:relative;
+  overflow:hidden;
+  background:#ddd;
+}
+.dish-img img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform .5s;
+}
+.dish-card:hover .dish-img img{ transform:scale(1.08); }
+.dish-tag{
+  position:absolute;top:8px;left:8px;
+  padding:4px 9px;
+  border-radius:20px;
+  font-size:11px;font-weight:700;
+  color:#fff;
+  z-index:2;
+}
+.dish-tag.hit{ background:linear-gradient(135deg,var(--accent),var(--primary));}
+.dish-tag.new{ background:linear-gradient(135deg,var(--gold),var(--secondary));}
+.dish-body{ padding:11px 12px 12px;flex:1;display:flex;flex-direction:column;}
+.dish-name{
+  font-family:'Montserrat';font-weight:700;font-size:14px;
+  line-height:1.2;margin-bottom:4px;
+}
+.dish-desc{ font-size:11px;color:var(--muted);line-height:1.35;margin-bottom:10px;flex:1;}
+.dish-bottom{display:flex;align-items:center;justify-content:space-between;}
+.dish-price{ font-weight:800;font-size:16px;color:var(--bg-dark);font-family:'Montserrat';}
+.add-btn{
+  width:36px;height:36px;border-radius:50%;
+  border:none;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  color:#fff;font-size:18px;font-weight:700;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(255,94,58,.45);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .15s;
+}
+.add-btn:active{ transform:scale(.85); }
+
+/* ============================================================
+   ЭКРАН 2: РУЛЕТКА
+   ============================================================ */
+.roulette-screen{ padding:20px 18px; text-align:center;}
+.section-title{
+  font-family:'Montserrat';font-weight:800;
+  font-size:24px; margin-bottom:6px;
+}
+.section-sub{ font-size:14px;color:var(--muted);margin-bottom:22px;}
+
+.wheel-wrap{
+  position:relative;
+  width:300px;height:300px;
+  margin:0 auto 26px;
+}
+/* Указатель сверху */
+.wheel-pointer{
+  position:absolute;
+  top:-6px;left:50%;
+  transform:translateX(-50%);
+  width:0;height:0;
+  border-left:14px solid transparent;
+  border-right:14px solid transparent;
+  border-top:24px solid var(--accent);
+  z-index:5;
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.3));
+}
+.wheel{
+  width:100%;height:100%;
+  border-radius:50%;
+  border:8px solid #2a1810;
+  box-shadow:0 0 0 4px var(--gold),0 12px 40px rgba(0,0,0,.4);
+  transition:transform 4.5s cubic-bezier(.17,.67,.32,1);
+  position:relative;
+}
+.wheel-hub{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:60px;height:60px;border-radius:50%;
+  background:linear-gradient(135deg,#2a1810,#1a1a1a);
+  border:3px solid var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;z-index:4;
+  box-shadow:0 4px 12px rgba(0,0,0,.5);
+}
+
+.roulette-info{
+  background:#fff;border-radius:16px;padding:14px 16px;
+  margin-bottom:20px;box-shadow:var(--shadow);
+  font-size:14px;
+}
+.roulette-info.locked{ opacity:.85; }
+.progress-to-roulette{
+  height:10px;background:#eee4d8;border-radius:10px;overflow:hidden;margin-top:10px;
+}
+.progress-to-roulette span{
+  display:block;height:100%;
+  background:linear-gradient(90deg,var(--secondary),var(--primary));
+  border-radius:10px;
+  transition:width .5s;
+}
+
+/* Кнопка КРУТИТЬ — горящая */
+.spin-btn{
+  width:100%;
+  padding:18px;
+  font-family:'Montserrat';font-weight:800;font-size:18px;
+  color:#fff;letter-spacing:1px;
+  border:none;border-radius:18px;
+  background:linear-gradient(135deg,var(--primary),var(--secondary),var(--accent));
+  background-size:200% 200%;
+  cursor:pointer;
+  box-shadow:0 8px 24px rgba(255,94,58,.5);
+  position:relative;
+  overflow:hidden;
+  animation:gradientShift 4s ease infinite, glowPulse 2s infinite;
+  transition:transform .15s;
+}
+.spin-btn:active{ transform:scale(.97);}
+.spin-btn:disabled{
+  background:#c9c2b9;
+  box-shadow:none;
+  animation:none;
+  cursor:not-allowed;
+  color:#7a746c;
+}
+@keyframes glowPulse{
+  0%,100%{ box-shadow:0 8px 24px rgba(255,94,58,.5);}
+  50%{ box-shadow:0 8px 36px rgba(255,51,51,.8),0 0 0 4px rgba(255,149,0,.2);}
+}
+
+.prizes-list{
+  margin-top:24px;text-align:left;
+  background:#fff;border-radius:16px;padding:16px;box-shadow:var(--shadow);
+}
+.prizes-list h4{ font-family:'Montserrat';font-size:14px;margin-bottom:10px;}
+.prizes-list li{
+  list-style:none;font-size:13px;padding:6px 0;
+  display:flex;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.prizes-list li:last-child{ border:none;}
+
+/* ============================================================
+   ЭКРАН 3: ПАСПОРТ GRILL-МАСТЕРА
+   ============================================================ */
+.passport-screen{ padding:18px 16px;}
+.rank-card{
+  background:linear-gradient(135deg,#1a1a1a,#3d1c08);
+  border-radius:22px;padding:20px;color:#fff;
+  position:relative;overflow:hidden;margin-bottom:18px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+.rank-card::before{
+  content:"🔥";position:absolute;right:-10px;bottom:-20px;
+  font-size:120px;opacity:.12;
+}
+.rank-rank-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.rank-icon{
+  width:54px;height:54px;border-radius:50%;
+  background:linear-gradient(135deg,var(--secondary),var(--accent));
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  box-shadow:0 0 0 3px rgba(255,149,0,.3);
+}
+.rank-name{ font-family:'Montserrat';font-weight:800;font-size:18px;}
+.rank-xp-text{font-size:12px;opacity:.8;margin-top:2px;}
+.xp-bar{
+  height:12px;background:rgba(255,255,255,.15);border-radius:10px;overflow:hidden;
+  position:relative;
+}
+.xp-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--gold),var(--secondary),var(--primary));
+  border-radius:10px;
+  transition:width .8s ease;
+  position:relative;
+}
+.xp-fill::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
+  animation:shimmer 2s infinite;
+}
+@keyframes shimmer{ 0%{transform:translateX(-100%);}100%{transform:translateX(100%);} }
+.next-rank{font-size:11px;opacity:.75;margin-top:8px;}
+
+.quest-grid{ display:flex;flex-direction:column;gap:12px;}
+.quest-card{
+  background:#fff;border-radius:16px;padding:14px;
+  box-shadow:var(--shadow);
+  display:flex;gap:12px;align-items:center;
+}
+.quest-icon{
+  width:46px;height:46px;border-radius:14px;flex-shrink:0;
+  background:linear-gradient(135deg,#fff3e6,#ffe0cc);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.quest-card.done .quest-icon{ background:linear-gradient(135deg,#d4f5d0,#a8e6a1);}
+.quest-card.locked{ opacity:.6;filter:grayscale(.5);}
+.quest-info{flex:1;}
+.quest-title{font-weight:700;font-size:14px;margin-bottom:3px;}
+.quest-desc{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.quest-prog-text{font-size:11px;font-weight:600;color:var(--primary);}
+.quest-bar{height:6px;background:#f0e8de;border-radius:6px;overflow:hidden;margin-top:5px;}
+.quest-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--secondary),var(--primary));border-radius:6px;transition:width .8s;}
+.quest-check{font-size:22px;color:#3fbf38;}
+.quest-lock{font-size:22px;color:var(--muted);}
+
+.section-mini-title{
+  font-family:'Montserrat';font-weight:700;font-size:16px;
+  margin:22px 0 12px;display:flex;align-items:center;gap:8px;
+}
+
+/* ============================================================
+   ЭКРАН 4: КОРЗИНА
+   ============================================================ */
+.cart-screen{ padding:18px 16px;}
+.empty-cart{
+  text-align:center;padding:60px 20px;color:var(--muted);
+}
+.empty-cart .ico{font-size:64px;margin-bottom:14px;opacity:.5;}
+.empty-cart h3{font-family:'Montserrat';font-size:18px;color:var(--bg-dark);margin-bottom:6px;}
+
+.cart-list{display:flex;flex-direction:column;gap:12px;}
+.cart-item{
+  background:#fff;border-radius:16px;padding:12px;
+  display:flex;gap:12px;align-items:center;box-shadow:var(--shadow);
+  animation:slideIn .3s ease;
+}
+@keyframes slideIn{ from{opacity:0;transform:translateX(-12px);}to{opacity:1;transform:translateX(0);} }
+.cart-thumb{
+  width:60px;height:60px;border-radius:12px;object-fit:cover;flex-shrink:0;
+}
+.cart-info{flex:1;min-width:0;}
+.cart-info .n{font-weight:700;font-size:14px;margin-bottom:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cart-info .p{font-size:12px;color:var(--muted);}
+.qty{
+  display:flex;align-items:center;gap:8px;margin-top:6px;
+}
+.qty button{
+  width:26px;height:26px;border-radius:8px;border:1.5px solid var(--border);
+  background:#fff;font-weight:700;font-size:15px;cursor:pointer;color:var(--primary);
+  display:flex;align-items:center;justify-content:center;
+}
+.qty button:active{ background:#fff3e6;}
+.qty .v{font-weight:700;font-size:14px;min-width:18px;text-align:center;}
+.cart-remove{
+  background:none;border:none;color:var(--muted);font-size:18px;
+  cursor:pointer;padding:6px;align-self:flex-start;
+}
+.cart-remove:active{ color:var(--accent);}
+
+.promo-input{
+  display:flex;gap:8px;margin:18px 0;
+}
+.promo-input input{
+  flex:1;padding:13px 14px;border-radius:12px;border:1.5px solid var(--border);
+  font-family:'Inter';font-size:14px;background:#fff;
+}
+.promo-input input:focus{ outline:none;border-color:var(--primary);}
+.promo-input button{
+  padding:0 18px;border:none;border-radius:12px;
+  background:var(--bg-dark);color:#fff;font-weight:600;font-size:13px;cursor:pointer;
+}
+
+.cart-summary{
+  background:#fff;border-radius:16px;padding:16px;box-shadow:var(--shadow);
+  margin-bottom:14px;
+}
+.summary-row{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;color:#5a544c;}
+.summary-row.total{
+  font-family:'Montserrat';font-weight:800;font-size:20px;color:var(--bg-dark);
+  border-top:2px dashed var(--border);margin-top:8px;padding-top:12px;
+}
+.summary-row.total .coal-earn{color:var(--primary);font-size:13px;font-weight:600;}
+
+.checkout-btn{
+  width:100%;padding:18px;border:none;border-radius:18px;
+  font-family:'Montserrat';font-weight:800;font-size:17px;color:#fff;letter-spacing:.5px;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  cursor:pointer;box-shadow:var(--shadow-fire);
+  animation:glowPulse 2.4s infinite;
+  transition:transform .15s;
+}
+.checkout-btn:active{ transform:scale(.97);}
+
+/* ============================================================
+   ЭКРАН 5: ПРОФИЛЬ
+   ============================================================ */
+.profile-screen{ padding:18px 16px;}
+.profile-head{
+  background:linear-gradient(135deg,#1a1a1a,#3d1c08);
+  border-radius:22px;padding:24px 20px;color:#fff;text-align:center;
+  position:relative;overflow:hidden;margin-bottom:18px;
+}
+.profile-head::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 0%,rgba(255,149,0,.3),transparent 60%);
+}
+.avatar{
+  width:88px;height:88px;border-radius:50%;
+  margin:0 auto 12px;
+  background:linear-gradient(135deg,var(--secondary),var(--primary));
+  display:flex;align-items:center;justify-content:center;
+  font-size:40px;border:3px solid rgba(255,200,61,.5);
+  position:relative;z-index:1;
+  box-shadow:0 8px 20px rgba(0,0,0,.4);
+}
+.profile-name{font-family:'Montserrat';font-weight:800;font-size:20px;position:relative;z-index:1;}
+.profile-coal{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:10px;padding:6px 14px;border-radius:20px;
+  background:rgba(255,149,0,.18);border:1px solid rgba(255,149,0,.4);
+  font-weight:700;position:relative;z-index:1;
+}
+
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+.stat-card{
+  background:#fff;border-radius:16px;padding:14px;box-shadow:var(--shadow);text-align:center;
+}
+.stat-card .val{font-family:'Montserrat';font-weight:800;font-size:22px;color:var(--primary);}
+.stat-card .lbl{font-size:11px;color:var(--muted);margin-top:3px;}
+
+.settings-card{
+  background:#fff;border-radius:16px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px;
+}
+.settings-card h4{font-family:'Montserrat';font-size:14px;padding:14px 16px 8px;}
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 16px;border-top:1px solid var(--border);font-size:14px;
+}
+.toggle{
+  width:44px;height:25px;border-radius:14px;background:#ccc;
+  position:relative;cursor:pointer;transition:background .25s;
+}
+.toggle.on{ background:linear-gradient(135deg,var(--secondary),var(--primary));}
+.toggle::after{
+  content:"";position:absolute;top:2px;left:2px;
+  width:21px;height:21px;border-radius:50%;background:#fff;
+  transition:transform .25s;box-shadow:0 2px 4px rgba(0,0,0,.2);
+}
+.toggle.on::after{ transform:translateX(19px);}
+
+.history-card{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:6px 0;margin-bottom:18px;}
+.history-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 16px;border-top:1px solid var(--border);font-size:13px;
+}
+.history-item:first-child{border:none;}
+.history-item .h-name{font-weight:600;}
+.history-item .h-meta{font-size:11px;color:var(--muted);}
+.history-item .h-sum{font-weight:800;color:var(--primary);font-family:'Montserrat';}
+
+.logout-btn{
+  width:100%;padding:15px;border-radius:14px;
+  background:#fff;color:var(--accent);border:1.5px solid #ffd6cc;
+  font-weight:700;font-size:14px;cursor:pointer;
+}
+.logout-btn:active{ background:#fff5f2;}
+
+/* ============================================================
+   НИЖНЯЯ НАВИГАЦИЯ
+   ============================================================ */
+.tabbar{
+  flex-shrink:0;
+  height:78px;
+  padding-bottom:env(safe-area-inset-bottom,0);
+  background:rgba(26,26,26,.97);
+  backdrop-filter:blur(10px);
+  display:flex;
+  align-items:flex-start;
+  padding-top:10px;
+  border-top:1px solid rgba(255,149,0,.2);
+  z-index:50;
+}
+.tab{
+  flex:1;background:none;border:none;color:#7a7068;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  font-size:10.5px;font-weight:600;cursor:pointer;
+  padding:6px 0;position:relative;transition:color .2s;
+}
+.tab i{font-size:20px;}
+.tab.active{ color:var(--secondary);}
+.tab.active i{
+  color:var(--primary);
+  filter:drop-shadow(0 0 6px rgba(255,94,58,.7));
+}
+.tab.active::before{
+  content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:32px;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,var(--secondary),var(--primary));
+}
+.tab .cart-badge{
+  position:absolute;top:0;right:50%;margin-right:-22px;
+  background:var(--accent);color:#fff;
+  font-size:10px;font-weight:700;
+  min-width:18px;height:18px;border-radius:9px;padding:0 5px;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--bg-dark);
+}
+
+/* ============================================================
+   ПЛАВАЮЩАЯ КОРЗИНА (на меню)
+   ============================================================ */
+.floating-cart{
+  position:absolute;bottom:92px;right:16px;z-index:40;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  color:#fff;border-radius:30px;padding:12px 18px;
+  display:flex;align-items:center;gap:8px;
+  font-weight:700;font-size:14px;
+  box-shadow:0 8px 24px rgba(255,94,58,.5);
+  cursor:pointer;
+  transform:translateY(80px);opacity:0;pointer-events:none;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+}
+.floating-cart.show{ transform:translateY(0);opacity:1;pointer-events:auto;}
+.floating-cart .b{
+  background:rgba(255,255,255,.25);border-radius:12px;
+  padding:1px 8px;font-size:12px;
+}
+
+/* ============================================================
+   МОДАЛЬНОЕ ОКНО ВЫИГРЫША
+   ============================================================ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+  z-index:100;opacity:0;pointer-events:none;
+  transition:opacity .3s;padding:20px;
+}
+.modal-overlay.show{opacity:1;pointer-events:auto;}
+.modal{
+  background:linear-gradient(160deg,#fff,#fff8f0);
+  border-radius:26px;padding:32px 24px;
+  max-width:340px;width:100%;text-align:center;
+  position:relative;
+  transform:scale(.7);transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+}
+.modal-overlay.show .modal{ transform:scale(1);}
+.modal-prize-emoji{font-size:72px;margin-bottom:8px;animation:bounce .8s;}
+@keyframes bounce{
+  0%{transform:scale(0) rotate(-180deg);}
+  60%{transform:scale(1.2) rotate(10deg);}
+  100%{transform:scale(1) rotate(0);}
+}
+.modal h2{font-family:'Montserrat';font-weight:900;font-size:24px;
+  background:linear-gradient(90deg,var(--primary),var(--accent));
+  -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px;}
+.modal p{font-size:15px;color:#5a544c;margin-bottom:20px;line-height:1.5;}
+.modal-btn{
+  width:100%;padding:15px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  color:#fff;font-family:'Montserrat';font-weight:700;font-size:15px;
+  cursor:pointer;box-shadow:var(--shadow-fire);
+}
+
+/* Конфетти */
+.confetti-piece{
+  position:fixed;width:10px;height:14px;top:-20px;
+  z-index:99;pointer-events:none;border-radius:2px;
+  animation:confettiFall linear forwards;
+}
+@keyframes confettiFall{
+  to{ transform:translateY(110vh) rotate(720deg);opacity:0;}
+}
+
+/* ============================================================
+   TOAST-УВЕДОМЛЕНИЯ
+   ============================================================ */
+.toast-stack{
+  position:fixed;top:20px;left:50%;transform:translateX(-50%);
+  z-index:200;display:flex;flex-direction:column;gap:8px;
+  width:calc(100% - 32px);max-width:360px;pointer-events:none;
+}
+.toast{
+  background:var(--bg-dark);color:#fff;
+  padding:13px 18px;border-radius:14px;
+  font-size:14px;font-weight:600;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,.3);
+  border-left:4px solid var(--primary);
+  animation:toastIn .35s cubic-bezier(.34,1.56,.64,1),toastOut .3s ease 2.4s forwards;
+}
+.toast.success{border-left-color:#3fbf38;}
+.toast.warn{border-left-color:var(--gold);}
+@keyframes toastIn{ from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);} }
+@keyframes toastOut{ to{opacity:0;transform:translateY(-20px);} }
+
+/* Вспышка при добавлении в корзину */
+@keyframes popAdd{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.35);}
+  100%{transform:scale(1);}
+}
+.add-btn.pulse{ animation:popAdd .4s;}
+
+.bonus-info-card{
+  background:#fff;border-radius:16px;box-shadow:var(--shadow);
+  margin-bottom:18px;overflow:hidden;
+}
+.bonus-info-card h4{
+  font-family:'Montserrat';font-size:15px;padding:16px;
+  margin:0;cursor:pointer;display:flex;align-items:center;gap:6px;
+  user-select:none;position:relative;
+}
+.bonus-info-card h4::after{
+  content:"▾";position:absolute;right:16px;font-size:14px;color:var(--muted);
+  transition:transform .3s;
+}
+.bonus-info-card.collapsed h4::after{ transform:rotate(-90deg); }
+.bonus-info-card .bonus-body{
+  max-height:800px;overflow:hidden;
+  transition:max-height .35s ease, opacity .25s;
+  padding:0 16px 16px;
+}
+.bonus-info-card.collapsed .bonus-body{
+  max-height:0;opacity:0;padding:0 16px;
+}
+.bonus-item{
+  display:flex;gap:11px;padding:10px 0;
+  border-top:1px solid var(--border);
+  font-size:12.5px;line-height:1.45;color:#5a544c;
+}
+.bonus-item:first-of-type{ border:none; }
+.bonus-item .bi-icon{
+  flex-shrink:0;width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,#fff3e6,#ffe0cc);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.bonus-item b{ color:var(--bg-dark); }
+.bonus-item .hl{ color:var(--primary);font-weight:700; }
+.bonus-cta{
+  margin-top:12px;width:100%;padding:12px;border-radius:12px;
+  border:1.5px solid var(--border);background:#fff;
+  font-weight:600;font-size:13px;cursor:pointer;color:var(--primary);
+}
+.bonus-cta:active{ background:#fff3e6; }
+
+.demo-row{
+  display:flex;align-items:center;justify-content:space-between;
+  background:#fff;border-radius:12px;padding:12px 16px;margin-bottom:14px;
+  box-shadow:var(--shadow);font-size:13px;font-weight:600;
+}
+
+/* ============================================================
+   АДАПТИВ — ПОЛНЫЙ ДЕСКТОП
+   ============================================================ */
+@media(min-width:520px){
+  body{padding:24px 0;align-items:center;}
+  .phone{
+    min-height:900px;
+    max-height:940px;
+    border-radius:42px;
+    border:10px solid #0d0d0d;
+    overflow:hidden;
+  }
+}
+
+/* Планшет / большой телефон */
+@media(max-width:519px){
+  body{
+    display:block;
+    min-height:100vh;
+    min-height:100dvh;
+    background:var(--bg-light);
+  }
+  .phone{
+    max-width:100%;
+    min-height:100vh;
+    min-height:100dvh;
+    max-height:none;
+    border-radius:0;
+    border:none;
+    box-shadow:none;
+  }
+}
+
+/* Маленькие экраны — оптимизация */
+@media(max-width:400px){
+  .app-header{padding:14px 14px 12px;}
+  .logo{font-size:18px;}
+  .coal-balance{font-size:13px;padding:6px 10px;}
+  .categories{padding:12px 12px 6px;gap:8px;}
+  .cat-chip{padding:8px 12px;font-size:12px;}
+  .promo{margin:8px 12px 12px;padding:14px 16px;border-radius:16px;}
+  .promo h3{font-size:15px;}
+  .promo p{font-size:12px;}
+  .promo .badge{font-size:44px;}
+  .dish-grid{gap:10px;padding:0 12px;}
+  .dish-img{height:100px;}
+  .dish-body{padding:9px 10px 10px;}
+  .dish-name{font-size:12px;}
+  .dish-desc{font-size:10px;margin-bottom:6px;}
+  .dish-price{font-size:14px;}
+  .add-btn{width:32px;height:32px;font-size:16px;}
+  .section-title{font-size:20px;}
+  .section-sub{font-size:13px;}
+  .wheel-wrap{width:240px;height:240px;}
+  .wheel-hub{width:48px;height:48px;font-size:20px;}
+  .spin-btn{padding:14px;font-size:16px;border-radius:14px;}
+  .roulette-screen{padding:16px 14px;}
+  .prizes-list{padding:12px;}
+  .prizes-list li{font-size:12px;}
+  .passport-screen{padding:14px 12px;}
+  .rank-card{padding:16px;border-radius:18px;}
+  .rank-icon{width:46px;height:46px;font-size:22px;}
+  .rank-name{font-size:16px;}
+  .quest-card{padding:12px;gap:10px;}
+  .quest-icon{width:40px;height:40px;font-size:20px;}
+  .quest-title{font-size:13px;}
+  .quest-desc{font-size:10px;}
+  .cart-screen{padding:14px 12px;}
+  .cart-thumb{width:50px;height:50px;}
+  .cart-info .n{font-size:13px;}
+  .qty button{width:24px;height:24px;font-size:13px;}
+  .promo-input{gap:6px;}
+  .promo-input input{padding:11px 12px;font-size:13px;}
+  .promo-input button{padding:0 14px;font-size:12px;}
+  .summary-row{font-size:13px;}
+  .summary-row.total{font-size:18px;}
+  .checkout-btn{padding:15px;font-size:15px;border-radius:14px;}
+  .profile-screen{padding:14px 12px;}
+  .profile-head{padding:20px 16px;border-radius:18px;}
+  .avatar{width:72px;height:72px;font-size:34px;}
+  .profile-name{font-size:18px;}
+  .stats-grid{gap:10px;}
+  .stat-card{padding:12px;}
+  .stat-card .val{font-size:20px;}
+  .settings-card h4{font-size:13px;padding:12px 14px 6px;}
+  .setting-row{padding:11px 14px;font-size:13px;}
+  .history-item{padding:10px 14px;font-size:12px;}
+  .tabbar{height:68px;padding-top:8px;}
+  .tab{font-size:9.5px;}
+  .tab i{font-size:18px;}
+  .tab .cart-badge{min-width:16px;height:16px;font-size:9px;margin-right:-18px;}
+  .floating-cart{bottom:82px;right:12px;padding:10px 14px;font-size:13px;border-radius:24px;}
+  .modal{padding:24px 18px;border-radius:22px;max-width:300px;}
+  .modal h2{font-size:20px;}
+  .modal p{font-size:13px;}
+  .modal-btn{padding:13px;font-size:14px;}
+}
+
+/* Очень маленькие экраны (320px и менее) */
+@media(max-width:340px){
+  .app-header{padding:12px 10px 10px;}
+  .logo{font-size:16px;gap:4px;}
+  .coal-balance{font-size:12px;padding:5px 8px;}
+  .coal-balance .icon{font-size:14px;}
+  .categories{gap:6px;padding:10px 10px 4px;}
+  .cat-chip{padding:7px 10px;font-size:11px;border-radius:10px;}
+  .promo{margin:6px 10px 10px;padding:12px 14px;border-radius:14px;}
+  .promo h3{font-size:14px;}
+  .promo p{font-size:11px;}
+  .dish-grid{gap:8px;padding:0 10px;}
+  .dish-img{height:85px;}
+  .dish-body{padding:8px;}
+  .dish-name{font-size:11px;margin-bottom:2px;}
+  .dish-desc{font-size:9px;line-height:1.3;margin-bottom:4px;}
+  .dish-price{font-size:13px;}
+  .add-btn{width:28px;height:28px;font-size:14px;border-radius:50%;box-shadow:0 2px 8px rgba(255,94,58,.4);}
+  .wheel-wrap{width:200px;height:200px;}
+  .wheel-hub{width:40px;height:40px;font-size:18px;}
+  .wheel{border-width:6px;}
+  .spin-btn{padding:12px;font-size:14px;letter-spacing:0;}
+  .prizes-list h4{font-size:13px;}
+  .prizes-list li{font-size:11px;padding:5px 0;}
+  .quest-card{padding:10px;gap:8px;}
+  .quest-icon{width:36px;height:36px;border-radius:10px;font-size:18px;}
+  .quest-title{font-size:12px;}
+  .quest-desc{font-size:9px;}
+  .quest-prog-text{font-size:10px;}
+  .rank-card{padding:14px;}
+  .rank-rank-row{gap:10px;margin-bottom:10px;}
+  .rank-icon{width:40px;height:40px;font-size:20px;}
+  .rank-name{font-size:14px;}
+  .rank-xp-text{font-size:11px;}
+  .xp-bar{height:10px;}
+  .section-mini-title{font-size:14px;margin:16px 0 10px;}
+  .cart-item{padding:10px;gap:8px;}
+  .cart-thumb{width:44px;height:44px;border-radius:10px;}
+  .cart-info .n{font-size:12px;}
+  .cart-info .p{font-size:11px;}
+  .qty button{width:22px;height:22px;font-size:12px;}
+  .qty .v{font-size:13px;}
+  .promo-input{margin:14px 0;}
+  .cart-summary{padding:12px;}
+  .checkout-btn{padding:14px;font-size:14px;}
+  .profile-head{padding:18px 14px;}
+  .avatar{width:64px;height:64px;font-size:30px;}
+  .profile-name{font-size:16px;}
+  .profile-coal{font-size:13px;padding:5px 12px;}
+  .stat-card .val{font-size:18px;}
+  .stat-card .lbl{font-size:10px;}
+  .bonus-item{font-size:11px;}
+  .bonus-item .bi-icon{width:30px;height:30px;font-size:16px;}
+  .settings-card{border-radius:14px;}
+  .history-card{border-radius:14px;}
+  .logout-btn{padding:13px;font-size:13px;border-radius:12px;}
+  .tabbar{height:62px;padding-top:6px;}
+  .tab{font-size:9px;gap:2px;}
+  .tab i{font-size:16px;}
+  .floating-cart{bottom:76px;right:10px;padding:8px 12px;font-size:12px;gap:6px;border-radius:20px;}
+  .floating-cart .b{padding:1px 6px;font-size:11px;}
+}
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+
+  <!-- ============ ШАПКА ============ -->
+  <header class="app-header">
+    <div class="header-row">
+      <div class="logo">
+        <span class="flame">🔥</span> Все Про Жар
+      </div>
+      <div class="coal-balance" title="Игровая валюта">
+        <span class="icon">🔥</span>
+        <span id="coalCount">450</span>
+        <span class="add" onclick="addCoalDemo()">＋</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ КОНТЕНТ ============ -->
+  <main class="content" id="content">
+
+    <!-- ===== ЭКРАН 1: МЕНЮ ===== -->
+    <section class="screen active" id="screen-menu">
+      <!-- Категории (горизонтальный скролл) -->
+      <div class="categories" id="categories">
+        <div class="cat-chip active" data-cat="all">🍴 Всё</div>
+        <div class="cat-chip" data-cat="шашлык">🥩 Шашлык</div>
+        <div class="cat-chip" data-cat="крылья">🍗 Крылья</div>
+        <div class="cat-chip" data-cat="кебаб">🌯 Кебаб</div>
+        <div class="cat-chip" data-cat="салаты">🥗 Салаты</div>
+        <div class="cat-chip" data-cat="гарниры">🍟 Гарниры</div>
+        <div class="cat-chip" data-cat="десерты">🍰 Десерты</div>
+        <div class="cat-chip" data-cat="напитки">🍺 Напитки</div>
+      </div>
+
+      <!-- Промо-баннер -->
+      <div class="promo">
+        <span class="badge">🔥</span>
+        <h3>Сезон гриля открыт!</h3>
+        <p>Закажи от 1500₽ и крути рулетку «Поймай искру» 🎡</p>
+      </div>
+
+      <!-- Сетка блюд (генерируется JS) -->
+      <div class="dish-grid" id="dishGrid"></div>
+      <div style="height:24px;"></div>
+    </section>
+
+    <!-- ===== ЭКРАН 2: РУЛЕТКА ===== -->
+    <section class="screen" id="screen-roulette">
+      <div class="roulette-screen">
+        <h2 class="section-title">🎡 Поймай искру</h2>
+        <p class="section-sub">Крути колесо и забирай призы!</p>
+
+        <!-- Колесо -->
+        <div class="wheel-wrap">
+          <div class="wheel-pointer"></div>
+          <div class="wheel" id="wheel">
+            <svg viewBox="0 0 200 200" width="100%" height="100%" id="wheelSvg"></svg>
+          </div>
+          <div class="wheel-hub">🔥</div>
+        </div>
+
+        <!-- Инфо о доступности -->
+        <div class="roulette-info" id="rouletteInfo">
+          <div id="rouletteStatus">Сделайте заказ от 1500₽, чтобы крутить рулетку!</div>
+          <div class="progress-to-roulette"><span id="rouletteProgress" style="width:0%"></span></div>
+        </div>
+
+        <!-- Демо-переключатель: позволяет крутить рулетку без заказа -->
+        <div class="demo-row">
+          <span>🧪 Демо-режим (крутить без заказа)</span>
+          <div class="toggle" id="demoToggle" data-toggle></div>
+        </div>
+
+        <button class="spin-btn" id="spinBtn" disabled>🔥 КРУТИТЬ</button>
+
+        <!-- Список призов -->
+        <div class="prizes-list">
+          <h4>🎁 Возможные призы</h4>
+          <ul>
+            <li><span>🥫 Бесплатный соус</span><span class="hl">бесплатно</span></li>
+            <li><span>🍺 Напиток в подарок</span><span class="hl">бесплатно</span></li>
+            <li><span>🔥 +50 Угольков</span><span class="hl">на баланс</span></li>
+            <li><span>💰 Скидка 10%</span><span class="hl">промокод</span></li>
+            <li><span>🍽️ Комбо «Гриль-мастер»</span><span class="hl">подарок</span></li>
+            <li><span>🎲 Попробуй ещё раз</span><span class="hl">в другой раз</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ЭКРАН 3: ПАСПОРТ ===== -->
+    <section class="screen" id="screen-passport">
+      <div class="passport-screen">
+        <!-- Карточка ранга -->
+        <div class="rank-card">
+          <div class="rank-rank-row">
+            <div class="rank-icon" id="rankIcon">🏕️</div>
+            <div>
+              <div class="rank-name" id="rankName">Гость у костра</div>
+              <div class="rank-xp-text"><span id="rankXp">450</span> / 1000 XP</div>
+            </div>
+          </div>
+          <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:45%"></div></div>
+          <div class="next-rank" id="nextRank">До ранга «Разжигатель» осталось 550 XP</div>
+        </div>
+
+        <div class="section-mini-title">🎯 Квесты</div>
+        <div class="quest-grid" id="questGrid"></div>
+
+        <div class="section-mini-title">🏆 Награды ранга</div>
+        <div class="quest-grid">
+          <div class="quest-card">
+            <div class="quest-icon">🎁</div>
+            <div class="quest-info">
+              <div class="quest-title">Бонус +100 Угольков</div>
+              <div class="quest-desc">Награда при достижении ранга «Разжигатель»</div>
+            </div>
+          </div>
+          <div class="quest-card locked">
+            <div class="quest-icon">🔒</div>
+            <div class="quest-info">
+              <div class="quest-title">Секретное меню 🔒</div>
+              <div class="quest-desc">Откройте, став «Повелителем Жара»</div>
+            </div>
+            <div class="quest-lock">🔒</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ЭКРАН 4: КОРЗИНА ===== -->
+    <section class="screen" id="screen-cart">
+      <div class="cart-screen">
+        <h2 class="section-title" style="margin-bottom:18px;">🛒 Моя корзина</h2>
+        <div id="cartContainer"></div>
+      </div>
+    </section>
+
+    <!-- ===== ЭКРАН 5: ПРОФИЛЬ ===== -->
+    <section class="screen" id="screen-profile">
+      <div class="profile-screen">
+        <div class="profile-head">
+          <div class="avatar">👨‍🍳</div>
+          <div class="profile-name">Гриль-Мастер</div>
+          <div class="profile-coal">🔥 <span id="profileCoal">450</span> Угольков</div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card"><div class="val">12</div><div class="lbl">Заказов сделано</div></div>
+          <div class="stat-card"><div class="val">3</div><div class="lbl">До след. награды</div></div>
+          <div class="stat-card" style="grid-column:span 2;">
+            <div class="val" style="font-size:15px;line-height:1.3;">🥩 Шашлык из свинины</div>
+            <div class="lbl">Любимое блюдо</div>
+          </div>
+        </div>
+
+        <!-- КАК РАБОТАЕТ БОНУСНАЯ СИСТЕМА -->
+        <div class="bonus-info-card collapsed" id="bonusCard">
+          <h4 onclick="document.getElementById('bonusCard').classList.toggle('collapsed')">🔥 Как работает бонусная система</h4>
+          <div class="bonus-body">
+
+          <div class="bonus-item">
+            <div class="bi-icon">🔥</div>
+            <div><b>Угольки</b> — это внутренняя валюта. За каждый заказ вы получаете
+              <span class="hl">5%</span> от суммы угольками. Например, с заказа <b>1000₽</b>
+              вернётся <span class="hl">+50 🔥</span>. Угольки можно копить и тратить на соусы, напитки и скидки.</div>
+          </div>
+
+          <div class="bonus-item">
+            <div class="bi-icon">⭐</div>
+            <div><b>XP (опыт)</b> — повышает ваш ранг. За каждые <b>10₽</b> в заказе даётся
+              <span class="hl">1 XP</span>. Заказ на 1000₽ = <span class="hl">+100 XP</span>.
+              Чем выше ранг — тем больше привилегий.</div>
+          </div>
+
+          <div class="bonus-item">
+            <div class="bi-icon">🏕️</div>
+            <div><b>Ранги:</b> 🏕️ Гость у костра (0+) → 🔥 Разжигатель (500+) →
+              🍳 Мастер мангала (1500+) → 👑 Повелитель Жара (3000+).
+              За каждый новый ранг — бонус <span class="hl">+100 🔥</span>.</div>
+          </div>
+
+          <div class="bonus-item">
+            <div class="bi-icon">🎡</div>
+            <div><b>Рулетка «Поймай искру»</b> — доступна при заказе от <span class="hl">1500₽</span>.
+              Крутите колесо и выигрывайте: бесплатные соусы, напитки, угольки и скидки.</div>
+          </div>
+
+          <div class="bonus-item">
+            <div class="bi-icon">🎯</div>
+            <div><b>Квесты</b> — задания в Паспорте (попробовать виды мяса, заказать на сумму и т.д.).
+              За выполнение начисляются <span class="hl">XP и Угольки</span>.</div>
+          </div>
+
+          <div class="bonus-item">
+            <div class="bi-icon">🎁</div>
+            <div><b>Промокоды</b> вводятся в корзине. Активные: <span class="hl">SPARK10</span> (−10%),
+              <span class="hl">FIRE500</span> (−500₽), <span class="hl">UGOL100</span> (+100🔥).</div>
+          </div>
+
+          <button class="bonus-cta" onclick="showScreen('passport')">🏆 Открыть мой Паспорт</button>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h4>⚙️ Настройки</h4>
+          <div class="setting-row">
+            <span>🔔 Push-уведомления</span>
+            <div class="toggle on" data-toggle></div>
+          </div>
+          <div class="setting-row">
+            <span>📧 Email-рассылка</span>
+            <div class="toggle" data-toggle></div>
+          </div>
+          <div class="setting-row">
+            <span>🌙 Тёмная тема</span>
+            <div class="toggle" data-toggle></div>
+          </div>
+        </div>
+
+        <div class="settings-card" style="padding:6px 0;">
+          <h4 style="padding:14px 16px 8px;">📜 История заказов</h4>
+          <div class="history-item">
+            <div>
+              <div class="h-name">Шашлык из свинины ×2</div>
+              <div class="h-meta">2 июля 2026 · Выполнен</div>
+            </div>
+            <div class="h-sum">900₽</div>
+          </div>
+          <div class="history-item">
+            <div>
+              <div class="h-name">Комбо «Гриль-мастер»</div>
+              <div class="h-meta">28 июня 2026 · Выполнен</div>
+            </div>
+            <div class="h-sum">1290₽</div>
+          </div>
+          <div class="history-item">
+            <div>
+              <div class="h-name">Крылья BBQ + Лимонад</div>
+              <div class="h-meta">20 июня 2026 · Выполнен</div>
+            </div>
+            <div class="h-sum">580₽</div>
+          </div>
+        </div>
+
+        <button class="logout-btn" onclick="showToast('👋 Демо-режим: выход недоступен','warn')">Выйти из аккаунта</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ ПЛАВАЮЩАЯ КОРЗИНА ============ -->
+  <div class="floating-cart" id="floatingCart" onclick="showScreen('cart')">
+    <i class="fas fa-shopping-basket"></i>
+    <span id="floatingCartCount">0</span>
+    <span>·</span>
+    <span id="floatingCartSum">0₽</span>
+  </div>
+
+  <!-- ============ НИЖНЯЯ НАВИГАЦИЯ ============ -->
+  <nav class="tabbar">
+    <button class="tab active" data-screen="menu" onclick="showScreen('menu')">
+      <i class="fas fa-fire"></i><span>Меню</span>
+    </button>
+    <button class="tab" data-screen="roulette" onclick="showScreen('roulette')">
+      <i class="fas fa-bullseye"></i><span>Рулетка</span>
+    </button>
+    <button class="tab" data-screen="passport" onclick="showScreen('passport')">
+      <i class="fas fa-trophy"></i><span>Паспорт</span>
+    </button>
+    <button class="tab" data-screen="cart" onclick="showScreen('cart')">
+      <i class="fas fa-shopping-basket"></i><span>Корзина</span>
+      <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
+    </button>
+    <button class="tab" data-screen="profile" onclick="showScreen('profile')">
+      <i class="fas fa-user"></i><span>Профиль</span>
+    </button>
+  </nav>
+
+<!-- ============ МОДАЛКА ВЫИГРЫША ============ -->
+<div class="modal-overlay" id="winModal">
+  <div class="modal">
+    <div class="modal-prize-emoji" id="winEmoji">🎉</div>
+    <h2 id="winTitle">Поздравляем!</h2>
+    <p id="winText">Вы выиграли приз!</p>
+    <button class="modal-btn" onclick="closeWinModal()">Забрать приз 🎁</button>
+  </div>
+</div>
+
+<!-- Контейнер для toast-уведомлений -->
+<div class="toast-stack" id="toastStack"></div>
+
+</div>
+
+<script>
+/* ============================================================
+   ДАННЫЕ ПРИЛОЖЕНИЯ
+   ============================================================ */
+
+// Каталог блюд (с категориями для фильтрации)
+const DISHES = [
+  {id:1,  name:"Шашлык из свинины",      cat:"шашлык",  desc:"Сочный шашлык на углях, 200г",       price:450, tag:"hit",  emoji:"🥩", img:"https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80"},
+  {id:2,  name:"Шашлык из курицы",       cat:"шашлык",  desc:"Маринованная курица, 200г",           price:420, tag:null,   emoji:"🍗", img:"https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=400&q=80"},
+  {id:3,  name:"Шашлык из баранины",     cat:"шашлык",  desc:"Нежная баранина с луком, 200г",       price:520, tag:"hit",  emoji:"🍖", img:"https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80"},
+  {id:4,  name:"Шашлык из индейки",      cat:"шашлык",  desc:"Диетическое мясо на гриле, 200г",     price:430, tag:"new",  emoji:"🍗", img:"https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=400&q=80"},
+  {id:5,  name:"Крылья BBQ (6 шт)",      cat:"крылья",  desc:"Острые крылышки в фирменном соусе",   price:390, tag:"hit",  emoji:"🍗", img:"https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=400&q=80"},
+  {id:6,  name:"Крылья в медовом соусе", cat:"крылья",  desc:"Сладко-острые крылышки, 6 шт",        price:410, tag:null,   emoji:"🍯", img:"https://images.unsplash.com/photo-1608039755401-742074f0548d?w=400&q=80"},
+  {id:7,  name:"Крылья «Дымные»",        cat:"крылья",  desc:"Копчёные крылышки с паприкой, 8 шт",  price:460, tag:"new",  emoji:"🔥", img:"https://images.unsplash.com/photo-1527477396000-e27163b4b7e5?w=400&q=80"},
+  {id:8,  name:"Кебаб в лаваше",         cat:"кебаб",   desc:"Говядина, овощи, соус",               price:350, tag:"new",  emoji:"🌯", img:"https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?w=400&q=80"},
+  {id:9,  name:"Кебаб куриный",          cat:"кебаб",   desc:"Куриное филе с овощами в лаваше",     price:330, tag:null,   emoji:"🌯", img:"https://images.unsplash.com/photo-1561651823-34feb02250e4?w=400&q=80"},
+  {id:10, name:"Шаурма классик",         cat:"кебаб",   desc:"Свиное мясо, свежие овощи, соус",     price:370, tag:"hit",  emoji:"🥙", img:"https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=400&q=80"},
+  {id:11, name:"Овощи на гриле",         cat:"салаты",  desc:"Перец, баклажан, кабачок",            price:290, tag:null,   emoji:"🥒", img:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"},
+  {id:12, name:"Греческий салат",        cat:"салаты",  desc:"Свежие овощи, оливки, фета",          price:320, tag:null,   emoji:"🥗", img:"https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&q=80"},
+  {id:13, name:"Салат «Цезарь»",         cat:"салаты",  desc:"Романо, курица гриль, пармезан",      price:380, tag:"hit",  emoji:"🥗", img:"https://images.unsplash.com/photo-1551248429-40975aa4de74?w=400&q=80"},
+  {id:14, name:"Фирменный соус «Уголёк»",cat:"салаты",  desc:"Острый томатный соус",                price:90,  tag:null,   emoji:"🥫", img:"https://images.unsplash.com/photo-1631898039984-f4e2f5d27303?w=400&q=80"},
+  {id:15, name:"Соус «Дымок»",           cat:"салаты",  desc:"Копчёный барбекю-соус",               price:110, tag:null,   emoji:"🍯", img:"https://images.unsplash.com/photo-1606756790138-261d2b21cd75?w=400&q=80"},
+  {id:16, name:"Соус «Чесночный»",       cat:"салаты",  desc:"Нежный чесночный соус, 50мл",         price:80,  tag:"new",  emoji:"🧄", img:"https://images.unsplash.com/photo-1472476443507-c7a5948772fc?w=400&q=80"},
+  {id:17, name:"Лимонад «Искра»",        cat:"напитки", desc:"Домашний цитрусовый лимонад",         price:190, tag:"new",  emoji:"🍋", img:"https://images.unsplash.com/photo-1437418747212-8d9709afab22?w=400&q=80"},
+  {id:18, name:"Комбуча «Пламя»",        cat:"напитки", desc:"Игристый чайный напиток",             price:220, tag:null,   emoji:"🍵", img:"https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80"},
+  {id:19, name:"Кола / Спрайт",          cat:"напитки", desc:"Классический газированный напиток",   price:150, tag:null,   emoji:"🥤", img:"https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80"},
+  {id:20, name:"Пиво нефильтрованное",   cat:"напитки", desc:"Светлый нефильтрат 0.4л",             price:280, tag:"hit",  emoji:"🍺", img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&q=80"},
+  {id:21, name:"Свежевыжатый сок",       cat:"напитки", desc:"Апельсин или яблоко, 250мл",         price:200, tag:null,   emoji:"🍊", img:"https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400&q=80"},
+  {id:22, name:"Картофель фри",          cat:"гарниры", desc:"Хрустящий картофель с специями",      price:180, tag:null,   emoji:"🍟", img:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80"},
+  {id:23, name:"Картофель по-деревенски", cat:"гарниры", desc:"С хрустящей корочкой и чесноком",     price:200, tag:"hit",  emoji:"🥔", img:"https://images.unsplash.com/photo-1596560548464-f010549b84d7?w=400&q=80"},
+  {id:24, name:"Рис с овощами",          cat:"гарниры", desc:"Большой рис с сезонными овощами",     price:160, tag:null,   emoji:"🍚", img:"https://images.unsplash.com/photo-1512058564366-18510be2db87?w=400&q=80"},
+  {id:25, name:"Лаваш с чесноком",       cat:"гарниры", desc:"Свежий лаваш с чесночной начинкой",   price:120, tag:null,   emoji:"🫓", img:"https://images.unsplash.com/photo-1586444248879-bc604cbd555a?w=400&q=80"},
+  {id:26, name:"Хачапури",               cat:"гарниры", desc:"Грузинская лепёшка с сыром",          price:250, tag:"new",  emoji:"🧀", img:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80"},
+  {id:27, name:"Чизкейк «Уголёк»",       cat:"десерты", desc:"Сливочный чизкейк с карамелью",      price:280, tag:"hit",  emoji:"🍰", img:"https://images.unsplash.com/photo-1567171466295-4afa63d45416?w=400&q=80"},
+  {id:28, name:"Шоколадный фондан",      cat:"десерты", desc:"Тёплый шоколад с мороженым",          price:320, tag:"new",  emoji:"🍫", img:"https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?w=400&q=80"},
+  {id:29, name:"Мороженое (2 шарика)",   cat:"десерты", desc:"Ваниль + шоколад или клубника",       price:170, tag:null,   emoji:"🍨", img:"https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=400&q=80"},
+];
+
+// Сектора рулетки (по часовой стрелке). Индекс = сектор на колесе.
+const PRIZES = [
+  {emoji:"🥫", title:"Бесплатный соус!",       text:"Заберите любой соус бесплатно при следующем заказе.", color:"#ff5e3a"},
+  {emoji:"🍺", title:"Напиток в подарок!",     text:"Лимонад «Искра» ждёт вас в следующем заказе.",        color:"#ff9500"},
+  {emoji:"🔥", title:"+50 Угольков!",          text:"Угольки уже на вашем балансе.",                       color:"#ffc83d", coal:50},
+  {emoji:"💰", title:"Скидка 10%!",            text:"Промокод SPARK10 активирован на следующий заказ.",   color:"#ff3333"},
+  {emoji:"🍽️", title:"Комбо «Гриль-мастер»!", text:"Большое комбо в подарок! Заберите при заказе.",      color:"#8a5a2b"},
+  {emoji:"🎲", title:"Попробуйте ещё раз!",    text:"Не повезло в этот раз — в следующий раз точно!",     color:"#5a544c"},
+];
+
+// Квесты (прогресс вычисляется/хранится в state)
+const QUESTS = [
+  {id:"meat", icon:"🥩", title:"Мясной Босс",   desc:"Попробуйте 5 видов мяса",         goal:5,  progress:3, unit:"вида"},
+  {id:"first",icon:"🛎️", title:"Первый заказ",  desc:"Сделайте первый заказ",           goal:1,  progress:1, unit:""},
+  {id:"money",icon:"💰", title:"Щедрый гость",  desc:"Закажите на общую сумму 3000₽",   goal:3000,progress:1500,unit:"₽"},
+  {id:"sauce",icon:"🏆", title:"Дегустатор",    desc:"Попробуйте все соусы",            goal:4,  progress:0, unit:"соуса"},
+];
+
+// Ранги и пороги XP
+const RANKS = [
+  {min:0,    name:"Гость у костра",  icon:"🏕️", next:500},
+  {min:500,  name:"Разжигатель",     icon:"🔥", next:1500},
+  {min:1500, name:"Мастер мангала",  icon:"🍳", next:3000},
+  {min:3000, name:"Повелитель Жара", icon:"👑", next:Infinity},
+];
+
+/* ============================================================
+   СОСТОЯНИЕ ПРИЛОЖЕНИЯ (с сохранением в localStorage)
+   ============================================================ */
+let state = loadState();
+
+function defaultState(){
+  return {
+    coal: 450,
+    xp: 450,
+    cart: [],
+    roulettePlayed: false,
+    activeCategory: "all",
+    settings:{push:true,email:false,dark:false},
+    totalOrdered: 0,
+    demoMode: false,
+    activePromo: null,
+    usedPromos: [],
+    wonPrizes: [],
+    questsProgress:{meat:3,first:0,money:0,sauce:0},
+    orderHistory: [],
+  };
+}
+function loadState(){
+  try{
+    const s = JSON.parse(localStorage.getItem("vpz_state"));
+    if(s && typeof s === "object") return Object.assign(defaultState(), s);
+  }catch(e){}
+  return defaultState();
+}
+function saveState(){try{localStorage.setItem("vpz_state",JSON.stringify(state));}catch(e){console.error("saveState error:",e);}}
+
+/* ============================================================
+   УТИЛИТЫ
+   ============================================================ */
+function $(sel){ return document.querySelector(sel); }
+function $$(sel){ return document.querySelectorAll(sel); }
+function formatPrice(n){ return n.toLocaleString("ru-RU") + "₽"; }
+
+// Подсчёт суммы корзины
+function cartTotal(){
+  let sum = state.cart.reduce((s,it)=>{
+    const d = DISHES.find(x=>x.id===it.id);
+    return s + (d ? d.price*it.qty : 0);
+  },0);
+  if(state.activePromo==="SPARK10") sum=Math.floor(sum*0.9);
+  else if(state.activePromo==="FIRE500") sum=Math.max(0,sum-500);
+  return sum;
+}
+function cartCount(){
+  return state.cart.reduce((s,it)=>s+it.qty,0);
+}
+
+/* ============================================================
+   ТОAST-УВЕДОМЛЕНИЯ
+   ============================================================ */
+function showToast(msg, type){
+  const stack = $("#toastStack");
+  const t = document.createElement("div");
+  t.className = "toast" + (type?(" "+type):"");
+  const icon = type==="success"?"✅": type==="warn"?"⚠️":"ℹ️";
+  t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  stack.appendChild(t);
+  setTimeout(()=>t.remove(), 2900);
+}
+
+/* ============================================================
+   ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ
+   ============================================================ */
+let scrollPositions = {};
+function showScreen(name){
+  const cur = document.querySelector(".screen.active");
+  if(cur){ const cn=cur.id.replace("screen-",""); scrollPositions[cn]=$("#content").scrollTop; }
+  $$(".screen").forEach(s=>s.classList.remove("active"));
+  $("#screen-"+name).classList.add("active");
+  $$(".tab").forEach(t=>t.classList.toggle("active", t.dataset.screen===name));
+  $("#content").scrollTop = scrollPositions[name]||0;
+  // Плавающая корзина видна только на меню
+  $("#floatingCart").classList.toggle("show", name==="menu" && cartCount()>0);
+  // Обновляем динамические экраны
+  if(name==="cart") renderCart();
+  if(name==="roulette") updateRoulette();
+  if(name==="passport") renderPassport();
+  if(name==="profile") $("#profileCoal").textContent = state.coal;
+}
+
+/* ============================================================
+   ЭКРАН 1: РЕНДЕР МЕНЮ И ФИЛЬТРЫ
+   ============================================================ */
+function renderMenu(){
+  const grid = $("#dishGrid");
+  const cat = state.activeCategory;
+  const list = cat==="all" ? DISHES : DISHES.filter(d=>d.cat===cat);
+  grid.innerHTML = list.map(d=>`
+    <div class="dish-card" data-id="${d.id}">
+      <div class="dish-img">
+        ${d.tag ? `<span class="dish-tag ${d.tag}">${d.tag==="hit"?"🔥 Хит":"🆕 Новинка"}</span>` : ""}
+        <img src="${d.img}" alt="${d.name}" loading="lazy"
+             onerror="this.parentNode.style.background='linear-gradient(135deg,#ff9500,#ff3333)';this.style.display='none';this.parentNode.innerHTML+='<span style=\\'position:absolute;font-size:50px;top:50%;left:50%;transform:translate(-50%,-50%)\\'>${d.emoji}</span>'">
+      </div>
+      <div class="dish-body">
+        <div class="dish-name">${d.name}</div>
+        <div class="dish-desc">${d.desc}</div>
+        <div class="dish-bottom">
+          <div class="dish-price">${formatPrice(d.price)}</div>
+          <button class="add-btn" onclick="addToCart(${d.id}, this)" aria-label="Добавить в корзину">+</button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+// Переключение категории
+function setupCategories(){
+  $$(".cat-chip").forEach(chip=>{
+    chip.addEventListener("click", ()=>{
+      state.activeCategory = chip.dataset.cat;
+      $$(".cat-chip").forEach(c=>c.classList.remove("active"));
+      chip.classList.add("active");
+      renderMenu();
+      saveState();
+    });
+  });
+}
+
+/* ============================================================
+   КОРЗИНА: добавление / удаление / пересчёт
+   ============================================================ */
+function addToCart(id, btn){
+  const existing = state.cart.find(i=>i.id===id);
+  if(existing) existing.qty++;
+  else state.cart.push({id, qty:1});
+  saveState();
+  updateCounters();
+  // Анимация кнопки
+  if(btn){ btn.classList.remove("pulse"); void btn.offsetWidth; btn.classList.add("pulse"); }
+  const d = DISHES.find(x=>x.id===id);
+  showToast(`${d.emoji} ${d.name} — в корзине!`, "success");
+}
+
+function changeQty(id, delta){
+  const it = state.cart.find(i=>i.id===id);
+  if(!it) return;
+  it.qty += delta;
+  if(it.qty<=0) state.cart = state.cart.filter(i=>i.id!==id);
+  saveState();
+  updateCounters();
+  renderCart();
+}
+
+function removeFromCart(id){
+  state.cart = state.cart.filter(i=>i.id!==id);
+  saveState();
+  updateCounters();
+  renderCart();
+  showToast("🗑️ Товар удалён из корзины");
+}
+
+// Обновить все счётчики (бейдж, плавающая корзина, шапка)
+function updateCounters(){
+  const count = cartCount();
+  const sum = cartTotal();
+  const badge = $("#cartBadge");
+  if(count>0){ badge.style.display="flex"; badge.textContent = count; }
+  else badge.style.display="none";
+  $("#floatingCartCount").textContent = count;
+  $("#floatingCartSum").textContent = formatPrice(sum);
+  if(count>0) $("#floatingCart").classList.add("show");
+  else $("#floatingCart").classList.remove("show");
+  $("#coalCount").textContent = state.coal;
+  const pc=$("#profileCoal");if(pc) pc.textContent=state.coal;
+}
+
+/* ============================================================
+   ЭКРАН 4: РЕНДЕР КОРЗИНЫ
+   ============================================================ */
+function renderCart(){
+  const c = $("#cartContainer");
+  if(state.cart.length===0){
+    c.innerHTML = `
+      <div class="empty-cart">
+        <div class="ico">🛒</div>
+        <h3>Корзина пуста</h3>
+        <p>Добавьте блюда из меню,<br>чтобы оформить заказ!</p>
+        <button class="checkout-btn" style="margin-top:20px;" onclick="showScreen('menu')">🔥 Перейти в меню</button>
+      </div>`;
+    return;
+  }
+
+  const items = state.cart.map(it=>{
+    const d = DISHES.find(x=>x.id===it.id);
+    return `
+      <div class="cart-item">
+        <div style="width:60px;height:60px;border-radius:12px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#ff9500,#ff3333);display:flex;align-items:center;justify-content:center;font-size:30px;">
+          ${d.emoji}
+        </div>
+        <div class="cart-info">
+          <div class="n">${d.name}</div>
+          <div class="p">${formatPrice(d.price)} / шт</div>
+          <div class="qty">
+            <button onclick="changeQty(${d.id},-1)">−</button>
+            <span class="v">${it.qty}</span>
+            <button onclick="changeQty(${d.id},1)">+</button>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:800;font-family:'Montserrat';">${formatPrice(d.price*it.qty)}</div>
+          <button class="cart-remove" onclick="removeFromCart(${d.id})" title="Удалить">🗑️</button>
+        </div>
+      </div>`;
+  }).join("");
+
+  const sum = cartTotal();
+  const coalEarn = Math.floor(sum*0.05);
+  const toRoulette = Math.max(0, 1500 - sum);
+  const rawSum = state.cart.reduce((s,it)=>{const d=DISHES.find(x=>x.id===it.id);return s+(d?d.price*it.qty:0);},0);
+  const discount = rawSum - sum;
+
+  c.innerHTML = `
+    <div class="cart-list">${items}</div>
+
+    <div class="promo-input">
+      <input type="text" placeholder="🎁 Введите промокод" id="promoInput" value="${state.activePromo||''}">
+      <button onclick="applyPromo()">ОК</button>
+    </div>
+
+    <div class="cart-summary">
+      <div class="summary-row"><span>Сумма заказа</span><span>${formatPrice(rawSum)}</span></div>
+      ${discount>0?`<div class="summary-row"><span>Скидка (${state.activePromo})</span><span style="color:#3fbf38;">-${formatPrice(discount)}</span></div>`:''}
+      <div class="summary-row"><span>Доставка</span><span style="color:#3fbf38;">Бесплатно</span></div>
+      <div class="summary-row"><span>Кэшбэк Угольками (5%)</span><span style="color:var(--primary);font-weight:700;">+${coalEarn} 🔥</span></div>
+      <div class="summary-row total">
+        <span>Итого</span>
+        <span style="text-align:right;">${formatPrice(sum)}<div class="coal-earn">вернётся +${coalEarn} 🔥</div></span>
+      </div>
+    </div>
+
+    ${ toRoulette>0
+      ? `<div style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:12px;">
+           🎡 До рулетки осталось <b style="color:var(--primary)">${formatPrice(toRoulette)}</b> 🔥
+         </div>`
+      : `<div style="text-align:center;font-size:13px;color:#3fbf38;font-weight:700;margin-bottom:12px;">
+           🎡 Рулетка доступна! Крутите и выигрывайте!
+         </div>` }
+
+    <button class="checkout-btn" onclick="checkout()">🔥 ОФОРМИТЬ ЗАКАЗ</button>
+  `;
+}
+
+// Применение промокода
+function applyPromo(){
+  const v = $("#promoInput").value.trim().toUpperCase();
+  if(state.usedPromos && state.usedPromos.includes(v)){
+    showToast("❌ Промокод уже использован","warn"); return;
+  }
+  const codes = { "SPARK10":"Скидка 10% применена!", "FIRE500":"-500₽ применено!", "UGOL100":"+100 Угольков!" };
+  if(codes[v]){
+    state.activePromo = v;
+    if(!state.usedPromos) state.usedPromos = [];
+    state.usedPromos.push(v);
+    saveState();
+    showToast("✅ " + codes[v], "success");
+    if(v==="UGOL100"){ state.coal += 100; saveState(); updateCounters(); }
+    $("#promoInput").value = "";
+    renderCart();
+  } else {
+    showToast("❌ Неверный промокод","warn");
+  }
+}
+
+// Оформление заказа
+function checkout(){
+  const sum = cartTotal();
+  if(sum===0) return;
+  const coalEarn = Math.floor(sum*0.05);
+  state.coal += coalEarn;
+  state.xp += Math.floor(sum/10);
+  state.totalOrdered += sum;
+  state.roulettePlayed = false;
+
+  if(!state.orderHistory) state.orderHistory = [];
+  state.orderHistory.unshift({
+    id:Date.now(),
+    items:state.cart.map(it=>{const d=DISHES.find(x=>x.id===it.id);return{name:d.name,qty:it.qty,price:d.price};}),
+    total:sum,date:new Date().toISOString()
+  });
+  if(state.orderHistory.length>10) state.orderHistory=state.orderHistory.slice(0,10);
+
+  updateQuestsAfterOrder(sum);
+  state.cart = [];
+  state.activePromo = null;
+  saveState();
+  updateCounters();
+  renderPassport();
+  showToast(`🎉 Заказ оформлен! +${coalEarn} 🔥 и +${Math.floor(sum/10)} XP`, "success");
+  setTimeout(()=> showScreen("profile"), 900);
+}
+
+/* ============================================================
+   ЭКРАН 2: РУЛЕТКА — рисуем колесо и логику вращения
+   ============================================================ */
+function drawWheel(){
+  const svg = $("#wheelSvg");
+  const cx=100, cy=100, r=95;
+  const n = PRIZES.length;
+  const step = 360/n;
+  let html = "";
+  PRIZES.forEach((p,i)=>{
+    const a0 = i*step - 90;             // старт с верха
+    const a1 = a0 + step;
+    const rad = (deg)=> (deg*Math.PI/180);
+    const x0 = cx + r*Math.cos(rad(a0)), y0 = cy + r*Math.sin(rad(a0));
+    const x1 = cx + r*Math.cos(rad(a1)), y1 = cy + r*Math.sin(rad(a1));
+    const large = step>180?1:0;
+    html += `<path d="M${cx},${cy} L${x0},${y0} A${r},${r} 0 ${large} 1 ${x1},${y1} Z" fill="${p.color}" stroke="#1a1a1a" stroke-width="1.5"/>`;
+    // Текст/эмодзи по середине сектора
+    const mid = a0 + step/2;
+    const tx = cx + (r*0.62)*Math.cos(rad(mid));
+    const ty = cy + (r*0.62)*Math.sin(rad(mid));
+    html += `<text x="${tx}" y="${ty}" font-size="22" text-anchor="middle" dy=".3em">${p.emoji}</text>`;
+  });
+  svg.innerHTML = html;
+}
+
+let currentRotation = 0;
+let isSpinning = false;
+
+function updateRoulette(){
+  const sum = cartTotal();
+  const canSpin = (sum >= 1500 || state.demoMode) && !state.roulettePlayed;
+  const btn = $("#spinBtn");
+  const status = $("#rouletteStatus");
+  const prog = $("#rouletteProgress");
+
+  const pct = Math.min(100, (sum/1500)*100);
+  prog.style.width = state.demoMode ? "100%" : pct + "%";
+
+  if(state.roulettePlayed){
+    btn.disabled = true;
+    btn.textContent = "✅ Уже крутили сегодня";
+    status.innerHTML = "Вы уже крутили рулетку в этом заказе. Оформите заказ, чтобы крутить снова!";
+  } else if(state.demoMode){
+    btn.disabled = false;
+    btn.textContent = "🔥 КРУТИТЬ";
+    status.innerHTML = "🧪 Демо-режим — рулетка доступна без заказа!";
+  } else if(canSpin){
+    btn.disabled = false;
+    btn.textContent = "🔥 КРУТИТЬ";
+    status.innerHTML = `✅ Заказ на <b>${formatPrice(sum)}</b> — рулетка доступна!`;
+  } else {
+    btn.disabled = true;
+    btn.textContent = "🔒 ЗАКАЗ ОТ 1500₽";
+    status.innerHTML = `Сделайте заказ от <b>1500₽</b>, чтобы крутить рулетку! <br>Сейчас в корзине: ${formatPrice(sum)}.`;
+  }
+}
+
+function spin(){
+  if(isSpinning) return;
+  const sum = cartTotal();
+  if(!state.demoMode && sum < 1500){ showToast("Нужно заказать ещё на " + formatPrice(1500-sum), "warn"); return; }
+  if(state.roulettePlayed){ showToast("Вы уже крутили сегодня","warn"); return; }
+
+  isSpinning = true;
+  const btn = $("#spinBtn");
+  btn.disabled = true;
+  btn.textContent = "🎡 Крутим...";
+
+  const winIndex = Math.floor(Math.random()*PRIZES.length);
+  const sectorAngle = 360/PRIZES.length;
+  const centerAngle = winIndex * sectorAngle + sectorAngle/2 - 90;
+  const currentAngle = ((currentRotation % 360) + 360) % 360;
+  const delta = ((360 - centerAngle) - currentAngle + 360) % 360;
+  const targetAngle = currentRotation + 360*5 + delta;
+
+  currentRotation = targetAngle;
+  $("#wheel").style.transform = `rotate(${currentRotation}deg)`;
+
+  const safetyTimeout = setTimeout(()=>{
+    if(isSpinning){ isSpinning = false; btn.disabled = false; btn.textContent = "🔥 КРУТИТЬ"; }
+  }, 6000);
+
+  setTimeout(()=>{
+    clearTimeout(safetyTimeout);
+    isSpinning = false;
+    state.roulettePlayed = true;
+    const prize = PRIZES[winIndex];
+
+    if(!state.wonPrizes) state.wonPrizes = [];
+    state.wonPrizes.push({...prize,date:new Date().toISOString()});
+
+    if(prize.coal){ state.coal += prize.coal; updateCounters(); }
+    if(winIndex === 3) state.activePromo = "SPARK10";
+
+    saveState();
+    showWinModal(prize);
+    launchConfetti();
+    updateRoulette();
+    btn.disabled = false;
+    btn.textContent = "🔥 КРУТИТЬ";
+  }, 4600);
+}
+
+function showWinModal(prize){
+  $("#winEmoji").textContent = prize.emoji;
+  $("#winTitle").textContent = prize.title;
+  $("#winText").textContent = prize.text;
+  $("#winModal").classList.add("show");
+}
+function closeWinModal(){ $("#winModal").classList.remove("show"); }
+
+/* ============================================================
+   КОНФЕТТИ (создаём кусочки и роняем вниз)
+   ============================================================ */
+function launchConfetti(){
+  document.querySelectorAll('.confetti-piece').forEach(p=>p.remove());
+  const colors = ["#ff5e3a","#ff9500","#ff3333","#ffc83d","#ffffff"];
+  for(let i=0;i<60;i++){
+    const piece = document.createElement("div");
+    piece.className = "confetti-piece";
+    piece.style.left = Math.random()*100 + "vw";
+    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+    piece.style.animationDuration = (2 + Math.random()*1.5) + "s";
+    piece.style.animationDelay = (Math.random()*0.3) + "s";
+    piece.style.transform = `rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(piece);
+    setTimeout(()=>piece.remove(), 4000);
+  }
+}
+
+/* ============================================================
+   ЭКРАН 3: ПАСПОРТ — ранг и квесты
+   ============================================================ */
+function getRank(){
+  let r = RANKS[0];
+  for(const rank of RANKS){ if(state.xp >= rank.min) r = rank; }
+  return r;
+}
+
+function renderPassport(){
+  const rank = getRank();
+  const idx = RANKS.indexOf(rank);
+  const next = RANKS[idx+1];
+  $("#rankIcon").textContent = rank.icon;
+  $("#rankName").textContent = rank.name;
+
+  if(next){
+    const floor = rank.min;
+    const span = next.min - floor;
+    const have = state.xp - floor;
+    const pct = Math.min(100, (have/span)*100);
+    $("#xpFill").style.width = pct + "%";
+    $("#rankXp").textContent = state.xp;
+    document.querySelector(".rank-xp-text").innerHTML = `${state.xp} / ${next.min} XP`;
+    $("#nextRank").textContent = `До ранга «${next.name}» осталось ${Math.max(0,next.min-state.xp)} XP`;
+  } else {
+    $("#xpFill").style.width = "100%";
+    $("#rankXp").textContent = state.xp;
+    document.querySelector(".rank-xp-text").innerHTML = `МАКСИМАЛЬНЫЙ РАНГ`;
+    $("#nextRank").textContent = `👑 Вы достигли вершины — Повелитель Жара!`;
+  }
+
+  // Квесты
+  $("#questGrid").innerHTML = QUESTS.map(q=>{
+    const progress = (state.questsProgress&&state.questsProgress[q.id])||0;
+    const done = progress >= q.goal;
+    const pct = Math.min(100, (progress/q.goal)*100);
+    const progText = q.unit==="₽"
+      ? `${formatPrice(progress)} / ${formatPrice(q.goal)}`
+      : `${progress} / ${q.goal} ${q.unit}`;
+    return `
+      <div class="quest-card ${done?'done':''}">
+        <div class="quest-icon">${q.icon}</div>
+        <div class="quest-info">
+          <div class="quest-title">${q.title}</div>
+          <div class="quest-desc">${q.desc}</div>
+          <div class="quest-prog-text">${progText}</div>
+          <div class="quest-bar"><span style="width:${pct}%"></span></div>
+        </div>
+        <div class="quest-check">${done?'✅':''}</div>
+      </div>`;
+  }).join("");
+}
+
+// Обновление прогресса квестов после заказа
+function updateQuestsAfterOrder(orderSum){
+  if(!state.questsProgress) state.questsProgress={meat:3,first:0,money:0,sauce:0};
+  state.questsProgress.money = Math.min(3000, state.totalOrdered);
+  state.questsProgress.first = 1;
+  state.questsProgress.meat = Math.min(5, state.questsProgress.meat+1);
+
+  const sauceDishes = state.cart.filter(it=>{const d=DISHES.find(x=>x.id===it.id);return d&&d.cat==="салаты"&&d.name.toLowerCase().includes("соус");});
+  const uniqueSauces = new Set(sauceDishes.map(it=>it.id));
+  state.questsProgress.sauce = Math.min(4, state.questsProgress.sauce + uniqueSauces.size);
+
+  saveState();
+}
+
+/* ============================================================
+   Демо-начисление угольков (клик по ＋)
+   ============================================================ */
+function addCoalDemo(){
+  state.coal += 25;
+  saveState();
+  updateCounters();
+  showToast("🔥 +25 Угольков (демо)", "success");
+}
+
+/* ============================================================
+   ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
+   ============================================================ */
+function init(){
+  if(!state.questsProgress) state.questsProgress={meat:3,first:0,money:0,sauce:0};
+  state.questsProgress.money = Math.min(3000, state.totalOrdered);
+  if(state.totalOrdered>0) state.questsProgress.first = 1;
+
+  renderMenu();
+  setupCategories();
+  drawWheel();
+  renderPassport();
+  updateCounters();
+  updateRoulette();
+
+  $("#spinBtn").addEventListener("click", spin);
+
+  const demoEl = $("#demoToggle");
+  if(state.demoMode) demoEl.classList.add("on");
+  demoEl.addEventListener("click", ()=>{
+    state.demoMode = !state.demoMode;
+    demoEl.classList.toggle("on", state.demoMode);
+    if(state.demoMode) state.roulettePlayed = false;
+    saveState();
+    updateRoulette();
+    showToast(state.demoMode ? "🧪 Демо-режим включён — крутите без заказа!" : "🧪 Демо-режим выключен");
+  });
+
+  const keys=["push","email","dark"];
+  $$(".setting-row [data-toggle]").forEach((t,i)=>{
+    const key=keys[i];
+    if(state.settings[key]) t.classList.add("on");
+    t.addEventListener("click", ()=>{
+      t.classList.toggle("on");
+      state.settings[key]=t.classList.contains("on");
+      saveState();
+      showToast(t.classList.contains("on")?"✅ Включено":"⏹️ Выключено");
+    });
+  });
+
+  $("#winModal").addEventListener("click", e=>{
+    if(e.target.id==="winModal") closeWinModal();
+  });
+
+  if(!localStorage.getItem("vpz_visited")){
+    setTimeout(()=> showToast("👋 Добро пожаловать в «Все Про Жар»!"), 400);
+    localStorage.setItem("vpz_visited","1");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>

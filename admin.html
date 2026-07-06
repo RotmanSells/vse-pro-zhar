@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔥 Все Про Жар — Админ-панель</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+:root{
+  --primary:#ff5e3a;
+  --secondary:#ff9500;
+  --accent:#ff3333;
+  --bg:#f4f2ef;
+  --sidebar:#1a1a1a;
+  --card:#ffffff;
+  --text:#1a1a1a;
+  --muted:#6b6660;
+  --border:#ece8e2;
+  --shadow:0 4px 16px rgba(0,0,0,.06);
+  --success:#3fbf38;
+  --warn:#ffc83d;
+  --danger:#ff3333;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow-x:hidden;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;
+  -webkit-text-size-adjust:100%;text-size-adjust:100%;}
+
+/* Мобильный topbar (виден только на узких экранах) */
+.mobile-topbar{
+  display:none;position:fixed;top:0;left:0;right:0;height:56px;z-index:120;
+  background:var(--sidebar);color:#fff;align-items:center;
+  padding:0 14px;gap:10px;box-shadow:0 2px 10px rgba(0,0,0,.15);
+}
+.hamburger{
+  width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,.08);
+  border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;flex-shrink:0;
+}
+.hamburger:active{background:rgba(255,255,255,.16);}
+.mobile-brand{font-family:'Montserrat';font-weight:900;font-size:15px;
+  background:linear-gradient(90deg,var(--secondary),var(--primary));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  display:flex;align-items:center;gap:6px;flex:1;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mobile-page-name{font-size:14px;font-weight:700;white-space:nowrap;}
+
+/* Подложка для затемнения при открытом меню */
+.sidebar-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.sidebar-backdrop.show{opacity:1;pointer-events:auto;}
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+.login-overlay{
+  position:fixed;inset:0;background:linear-gradient(135deg,#1a1a1a,#3d1c08);
+  display:flex;align-items:center;justify-content:center;z-index:999;
+}
+.login-overlay.hidden{display:none;}
+.login-box{
+  background:#fff;border-radius:24px;padding:40px 32px;width:min(380px,90vw);
+  box-shadow:0 20px 60px rgba(0,0,0,.4);text-align:center;
+}
+.login-box .logo{font-family:'Montserrat';font-weight:900;font-size:26px;
+  background:linear-gradient(90deg,var(--secondary),var(--primary));
+  -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px;}
+.login-box .sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
+.login-box input{
+  width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid var(--border);
+  font-size:14px;margin-bottom:12px;font-family:'Inter';background:#fafafa;
+}
+.login-box input:focus{outline:none;border-color:var(--primary);}
+.login-box button{
+  width:100%;padding:14px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  color:#fff;font-weight:700;font-size:15px;cursor:pointer;
+  box-shadow:0 6px 20px rgba(255,94,58,.4);margin-top:4px;
+}
+.login-box button:active{transform:scale(.98);}
+.login-error{color:var(--danger);font-size:12px;margin-top:8px;display:none;}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sidebar{
+  width:240px;background:var(--sidebar);color:#fff;
+  display:flex;flex-direction:column;flex-shrink:0;
+  position:fixed;top:0;left:0;bottom:0;z-index:100;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.sidebar-logo{
+  padding:24px 20px 20px;font-family:'Montserrat';font-weight:900;font-size:20px;
+  background:linear-gradient(90deg,var(--secondary),var(--primary));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.08);
+}
+.sidebar-logo .flame{-webkit-text-fill-color:initial;}
+.sidebar-nav{flex:1;padding:12px 0;}
+.nav-item{
+  display:flex;align-items:center;gap:12px;padding:13px 20px;
+  color:#9a9590;cursor:pointer;font-size:14px;font-weight:500;
+  transition:all .2s;border-left:3px solid transparent;
+}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.05);}
+.nav-item.active{color:var(--secondary);background:rgba(255,149,0,.08);border-left-color:var(--primary);}
+.nav-item i{width:20px;text-align:center;font-size:16px;}
+.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,.08);
+  font-size:12px;color:#6a6560;}
+.sidebar-footer a{color:var(--primary);text-decoration:none;cursor:pointer;}
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+.main{margin-left:240px;flex:1;padding:28px 32px;min-height:100vh;min-width:0;overflow-x:hidden;}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.page-title{font-family:'Montserrat';font-weight:800;font-size:24px;}
+.page-subtitle{font-size:13px;color:var(--muted);margin-top:2px;}
+.header-actions{display:flex;gap:10px;}
+.btn{
+  padding:10px 18px;border-radius:10px;border:none;font-weight:600;font-size:13px;
+  cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;box-shadow:0 4px 12px rgba(255,94,58,.3);}
+.btn-outline{background:#fff;color:var(--text);border:1.5px solid var(--border);}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary);}
+.btn-success{background:var(--success);color:#fff;}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-sm{padding:7px 12px;font-size:12px;border-radius:8px;}
+
+.screen{display:none;animation:fadeIn .3s ease;}
+.screen.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ============================================================
+   МЕТРИКИ
+   ============================================================ */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+.metric-card{
+  background:var(--card);border-radius:16px;padding:18px 20px;
+  box-shadow:var(--shadow);position:relative;overflow:hidden;
+}
+.metric-card::after{
+  content:"";position:absolute;right:-10px;top:-10px;width:60px;height:60px;
+  border-radius:50%;opacity:.1;
+}
+.metric-card.revenue::after{background:var(--primary);}
+.metric-card.orders::after{background:var(--success);}
+.metric-card.avg::after{background:var(--secondary);}
+.metric-card.customers::after{background:var(--warn);}
+.metric-label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.metric-value{font-family:'Montserrat';font-weight:900;font-size:28px;margin:6px 0 2px;}
+.metric-change{font-size:12px;font-weight:600;}
+.metric-change.up{color:var(--success);}
+.metric-change.down{color:var(--danger);}
+.metric-icon{font-size:22px;position:absolute;right:18px;top:18px;opacity:.7;}
+
+/* ============================================================
+   ГРАФИК
+   ============================================================ */
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:28px;}
+.chart-card{background:var(--card);border-radius:16px;padding:20px;box-shadow:var(--shadow);}
+.chart-card h3{font-family:'Montserrat';font-weight:700;font-size:15px;margin-bottom:16px;}
+.chart-canvas{width:100%;height:220px;}
+
+/* ============================================================
+   ТАБЛИЦЫ
+   ============================================================ */
+.table-card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;}
+/* Горизонтальный скролл для таблиц на узких экранах */
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.table-scroll::-webkit-scrollbar{height:6px;}
+.table-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.table-scroll table{min-width:560px;}
+.table-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap;}
+.table-header h3{font-family:'Montserrat';font-weight:700;font-size:15px;}
+.table-header > div{flex-wrap:wrap;}
+.table-search{
+  padding:8px 14px;border-radius:8px;border:1.5px solid var(--border);
+  font-size:13px;width:220px;font-family:'Inter';min-width:0;
+}
+.table-search:focus{outline:none;border-color:var(--primary);}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;padding:12px 20px;font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);}
+td{padding:14px 20px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:hover td{background:rgba(255,149,0,.02);}
+.status-badge{
+  display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;
+}
+.status-new{background:#fff3e6;color:#ff9500;}
+.status-cooking{background:#ffe8e6;color:#ff3333;}
+.status-ready{background:#d4f5d0;color:#2a9d26;}
+.status-delivered{background:#e6f0ff;color:#3388ff;}
+.status-cancelled{background:#f0e6e6;color:#999;}
+
+/* ============================================================
+   МОДАЛКА
+   ============================================================ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;z-index:200;padding:20px;
+}
+.modal-overlay.show{display:flex;}
+.modal-box{
+  background:#fff;border-radius:20px;padding:28px;width:100%;max-width:500px;
+  max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.modal-box h3{font-family:'Montserrat';font-weight:800;font-size:18px;margin-bottom:18px;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;}
+.form-group input,.form-group select,.form-group textarea{
+  width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid var(--border);
+  font-size:13px;font-family:'Inter';background:#fafafa;
+}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--primary);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+
+/* Бейдж */
+.badge-count{
+  background:var(--accent);color:#fff;font-size:10px;font-weight:700;
+  min-width:18px;height:18px;border-radius:9px;padding:0 5px;
+  display:inline-flex;align-items:center;justify-content:center;margin-left:6px;
+}
+
+/* Тост */
+.toast-stack{position:fixed;top:20px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px;}
+.toast{
+  background:var(--sidebar);color:#fff;padding:12px 18px;border-radius:12px;
+  font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;
+  box-shadow:0 8px 24px rgba(0,0,0,.3);border-left:4px solid var(--success);
+  animation:toastIn .3s ease,toastOut .3s ease 2.5s forwards;
+}
+.toast.error{border-left-color:var(--danger);}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+@keyframes toastOut{to{opacity:0;transform:translateX(20px);}}
+
+/* Адаптив — ПОЛНЫЙ */
+@media(max-width:1200px){
+  .main{padding:24px 24px;}
+}
+
+/* Планшет/ноутбук — сайдбар сворачивается в иконки */
+@media(max-width:1024px){
+  .sidebar{width:60px;overflow:hidden;}
+  .sidebar-logo span,.nav-item span,.sidebar-footer{display:none;}
+  .sidebar-logo{justify-content:center;padding:20px 0;}
+  .nav-item{justify-content:center;padding:13px 0;border-left:none;}
+  .nav-item .badge-count{display:none;}
+  .main{margin-left:60px;padding:20px;}
+  .metrics{grid-template-columns:repeat(2,1fr);}
+  .charts-row{grid-template-columns:1fr;}
+  .segment-grid{grid-template-columns:repeat(2,1fr);}
+  .page-header{flex-direction:column;align-items:flex-start;gap:12px;}
+  .header-actions{width:100%;}
+  .header-actions .btn{flex:1;justify-content:center;}
+}
+
+/* Планшет в портрете */
+@media(max-width:768px){
+  .mobile-topbar{display:flex;}
+  .sidebar{transform:translateX(-100%);width:240px;}
+  .sidebar.open{transform:translateX(0);box-shadow:4px 0 20px rgba(0,0,0,.4);}
+  .sidebar.open .sidebar-logo span,.sidebar.open .nav-item span,.sidebar.open .sidebar-footer{display:initial;}
+  .sidebar.open .sidebar-logo{justify-content:flex-start;padding:24px 20px 20px;}
+  .sidebar.open .nav-item{justify-content:flex-start;padding:13px 20px;border-left:3px solid transparent;}
+  .sidebar.open .nav-item.active{border-left-color:var(--primary);}
+  .main{margin-left:0;padding:16px;padding-top:72px;}
+  .metrics{grid-template-columns:repeat(2,1fr);gap:12px;}
+  .metric-card{padding:14px 16px;}
+  .metric-value{font-size:22px;}
+  .metric-icon{font-size:18px;}
+  .chart-canvas{height:180px;}
+  .page-title{font-size:20px;}
+  .page-header{flex-direction:column;align-items:flex-start;gap:12px;}
+  .header-actions{width:100%;}
+  .table-header{flex-direction:column;align-items:flex-start;gap:10px;}
+  .table-header > div{width:100%;display:flex;gap:8px;}
+  .table-search{width:100%!important;}
+  .segment-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .segment-card{padding:14px;}
+  .segment-card .seg-count{font-size:24px;}
+  .msg-templates{grid-template-columns:repeat(2,1fr);}
+  .msg-stats{grid-template-columns:repeat(2,1fr);}
+  .form-row{grid-template-columns:1fr;}
+  .modal-box{margin:10px;max-width:calc(100vw - 20px);}
+  .modal-overlay{padding:10px;}
+  .toast-stack{right:16px;top:72px;}
+  .login-box{width:calc(100vw - 40px);padding:28px 24px;}
+}
+
+/* Мобильные — карточный вид таблиц, всё по ширине экрана */
+@media(max-width:560px){
+  /* Метрики */
+  .metrics{grid-template-columns:1fr 1fr;gap:10px;}
+  .metric-card{padding:12px 14px;}
+  .metric-value{font-size:20px;}
+  .metric-label{font-size:11px;}
+  .metric-icon{font-size:16px;right:12px;top:12px;}
+  .metric-card::after{display:none;}
+
+  /* Графики */
+  .charts-row{grid-template-columns:1fr;gap:12px;}
+  .chart-canvas{height:160px;}
+  .chart-card{padding:14px;}
+  .chart-card h3{font-size:13px;margin-bottom:12px;}
+
+  /* Заголовки */
+  .page-title{font-size:18px;}
+  .page-subtitle{font-size:12px;}
+  .page-header{margin-bottom:16px;}
+
+  /* Кнопки */
+  .btn{padding:8px 14px;font-size:12px;}
+  .btn-primary{font-size:12px;}
+  .header-actions{flex-wrap:wrap;width:100%;}
+  .header-actions .btn{min-width:0;flex:1;}
+
+  /* === ТАБЛИЦЫ — КАРТОЧНЫЙ ВИД === */
+  .table-card{overflow:visible;box-shadow:none;background:transparent;}
+  .table-scroll{overflow:visible;-webkit-overflow-scrolling:unset;}
+  .table-scroll::-webkit-scrollbar{display:none;}
+  .table-scroll table,
+  .table-scroll thead,
+  .table-scroll tbody,
+  .table-scroll tr{display:block;width:100%;min-width:0;}
+  .table-scroll thead{display:none;}
+  .table-scroll tr{
+    background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;
+    box-shadow:0 2px 12px rgba(0,0,0,.06);
+  }
+  .table-scroll td{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:5px 0;border:none;font-size:13px;text-align:right;
+    overflow:hidden;gap:8px;
+  }
+  .table-scroll td::before{
+    content:attr(data-label);font-weight:600;color:var(--muted);
+    text-align:left;flex-shrink:0;width:35%;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .table-scroll td:last-child{justify-content:flex-end;}
+  .table-header{padding:0 0 12px;flex-direction:column;gap:8px;}
+  .table-header h3{font-size:14px;}
+  .table-header > div{width:100%;display:flex;gap:8px;}
+  .table-search{width:100%!important;flex:1;}
+
+  /* Сегменты */
+  .segment-grid{grid-template-columns:1fr 1fr;gap:8px;}
+  .segment-card{padding:12px;}
+  .segment-card .seg-icon{font-size:26px;}
+  .segment-card .seg-name{font-size:12px;}
+  .segment-card .seg-count{font-size:20px;}
+  .segment-card .seg-desc{display:none;}
+
+  /* Сообщения */
+  .msg-templates{grid-template-columns:1fr 1fr;gap:6px;}
+  .msg-tpl{padding:6px 8px;font-size:11px;}
+  .msg-stats{grid-template-columns:1fr 1fr;gap:8px;}
+  .msg-stat{padding:10px;}
+  .msg-stat .val{font-size:18px;}
+
+  /* Модалки — bottom sheet */
+  .modal-overlay{padding:0;align-items:flex-end;}
+  .modal-box{
+    max-width:100%;border-radius:20px 20px 0 0;
+    max-height:90vh;margin:0;padding:20px;
+    animation:slideUp .3s ease;
+  }
+  .modal-box h3{font-size:16px;margin-bottom:14px;}
+  .form-group input,.form-group select,.form-group textarea{padding:10px 12px;font-size:13px;}
+  .modal-actions{flex-direction:column-reverse;gap:8px;}
+  .modal-actions .btn{width:100%;justify-content:center;}
+
+  /* Логин */
+  .login-box{padding:24px 20px;border-radius:20px;}
+  .login-box .logo{font-size:22px;}
+
+  /* Тосты */
+  .toast-stack{left:16px;right:16px;}
+  .toast{width:100%;}
+
+  /* Скроллбар — убираем */
+  ::-webkit-scrollbar{width:0;height:0;}
+}
+
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+
+/* Маленькие телефоны (320-380px) */
+@media(max-width:380px){
+  .main{padding:12px;padding-top:68px;}
+  .metrics{grid-template-columns:1fr;gap:10px;}
+  .metric-card{padding:14px;}
+  .metric-value{font-size:24px;}
+  .page-title{font-size:17px;}
+  .segment-grid{grid-template-columns:1fr;}
+  .segment-card{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .segment-card .seg-icon{font-size:28px;margin-bottom:0;}
+  .segment-card .seg-name{font-size:13px;}
+  .segment-card .seg-badge{position:static;}
+  .msg-templates{grid-template-columns:1fr;}
+  .msg-stats{grid-template-columns:1fr;}
+  .header-actions{flex-direction:column;}
+  .header-actions .btn{width:100%;}
+}
+
+/* ============================================================
+   СЕГМЕНТЫ
+   ============================================================ */
+.segment-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.segment-card{
+  background:var(--card);border-radius:16px;padding:18px;
+  box-shadow:var(--shadow);cursor:pointer;transition:all .25s;
+  border:2px solid transparent;position:relative;overflow:hidden;
+}
+.segment-card:hover{border-color:var(--primary);transform:translateY(-3px);box-shadow:0 8px 24px rgba(255,94,58,.15);}
+.segment-card .seg-icon{font-size:32px;margin-bottom:8px;}
+.segment-card .seg-name{font-family:'Montserrat';font-weight:700;font-size:14px;margin-bottom:4px;}
+.segment-card .seg-count{font-family:'Montserrat';font-weight:900;font-size:28px;color:var(--primary);}
+.segment-card .seg-label{font-size:11px;color:var(--muted);margin-top:2px;}
+.segment-card .seg-desc{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.4;}
+.segment-card .seg-badge{
+  position:absolute;top:12px;right:12px;
+  padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700;
+}
+.seg-badge.warning{background:#fff3e6;color:#ff9500;}
+.seg-badge.danger{background:#ffe8e6;color:#ff3333;}
+.seg-badge.success{background:#d4f5d0;color:#2a9d26;}
+.seg-badge.info{background:#e6f0ff;color:#3388ff;}
+.seg-badge.purple{background:#f0e6ff;color:#9b59b6;}
+
+/* Модалка сообщений */
+.msg-templates{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.msg-tpl{
+  display:flex;align-items:center;gap:6px;padding:8px 10px;
+  border:1.5px solid var(--border);border-radius:10px;cursor:pointer;
+  font-size:12px;font-weight:600;transition:all .2s;background:#fff;
+}
+.msg-tpl:hover{border-color:var(--primary);background:#fff8f5;}
+.msg-tpl.active{border-color:var(--primary);background:#fff3e6;}
+.tpl-icon{font-size:18px;}
+.tpl-text{font-size:11px;}
+.msg-preview-box{
+  background:#f9f7f4;border-radius:12px;padding:14px;margin-bottom:14px;
+}
+.msg-preview-content{
+  background:#fff;border-radius:10px;padding:12px 14px;font-size:13px;
+  line-height:1.5;border-left:4px solid var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+.msg-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.msg-stat{
+  background:var(--card);border-radius:14px;padding:14px;text-align:center;
+  box-shadow:var(--shadow);
+}
+.msg-stat .val{font-family:'Montserrat';font-weight:800;font-size:22px;color:var(--primary);}
+.msg-stat .lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ============================================================
+   UX: ТАЧ-ЦЕЛИ, TOUCH-ACTION, FOCUS-VISIBLE
+   ============================================================ */
+button,.btn,.nav-item,.segment-card,.msg-tpl,.cat-chip,.hamburger{
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  user-select:none;
+}
+@media(max-width:768px){
+  .btn{min-height:44px;}
+  .btn-sm{min-height:38px;}
+  .nav-item{min-height:44px;}
+}
+.btn:focus-visible,.nav-item:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid var(--primary);outline-offset:2px;
+}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="logo">🔥 Все Про Жар</div>
+    <div class="sub">Панель управления рестораном</div>
+    <input type="text" id="loginUser" placeholder="Логин" value="admin">
+    <input type="password" id="loginPass" placeholder="Пароль" value="admin">
+    <div class="login-error" id="loginError">Неверный логин или пароль</div>
+    <button onclick="doLogin()">Войти</button>
+    <div style="margin-top:16px;font-size:11px;color:var(--muted);">Демо: admin / admin</div>
+  </div>
+</div>
+
+<!-- ============ MOBILE TOPBAR ============ -->
+<div class="mobile-topbar" id="mobileTopbar">
+  <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+  <div class="mobile-brand">🔥 Все Про Жар</div>
+  <div class="mobile-page-name" id="mobilePageName">Дашборд</div>
+</div>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+<!-- ============ SIDEBAR ============ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <span class="flame">🔥</span><span>VPZ Admin</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')" title="Дашборд">
+      <i class="fas fa-chart-pie"></i><span>Дашборд</span>
+    </div>
+    <div class="nav-item" data-page="orders" onclick="showPage('orders')" title="Заказы">
+      <i class="fas fa-receipt"></i><span>Заказы</span>
+      <span class="badge-count" id="ordersBadge">0</span>
+    </div>
+    <div class="nav-item" data-page="menu" onclick="showPage('menu')" title="Меню">
+      <i class="fas fa-utensils"></i><span>Меню</span>
+    </div>
+    <div class="nav-item" data-page="promos" onclick="showPage('promos')" title="Промокоды">
+      <i class="fas fa-tag"></i><span>Промокоды</span>
+    </div>
+    <div class="nav-item" data-page="customers" onclick="showPage('customers')" title="Клиенты">
+      <i class="fas fa-users"></i><span>Клиенты</span>
+    </div>
+    <div class="nav-item" data-page="segments" onclick="showPage('segments')" title="Сегменты">
+      <i class="fas fa-layer-group"></i><span>Сегменты</span>
+    </div>
+
+  </nav>
+  <div class="sidebar-footer">
+    <a onclick="doLogout()">Выйти</a> · v1.0
+  </div>
+</aside>
+
+<!-- ============ MAIN ============ -->
+<div class="main">
+
+  <!-- ===== ДАШБОРД ===== -->
+  <div class="screen active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Дашборд</div>
+        <div class="page-subtitle">Обзор ресторана за сегодня</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-outline" onclick="exportCSV()"><i class="fas fa-download"></i> Экспорт CSV</button>
+        <button class="btn btn-primary" onclick="generateDemoData()"><i class="fas fa-magic"></i> Генерировать данные</button>
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric-card revenue">
+        <div class="metric-icon">💰</div>
+        <div class="metric-label">Выручка</div>
+        <div class="metric-value" id="mRevenue">0₽</div>
+        <div class="metric-change up" id="mRevenueChange">+0%</div>
+      </div>
+      <div class="metric-card orders">
+        <div class="metric-icon">📦</div>
+        <div class="metric-label">Заказов</div>
+        <div class="metric-value" id="mOrders">0</div>
+        <div class="metric-change up" id="mOrdersChange">+0%</div>
+      </div>
+      <div class="metric-card avg">
+        <div class="metric-icon">🧾</div>
+        <div class="metric-label">Средний чек</div>
+        <div class="metric-value" id="mAvg">0₽</div>
+        <div class="metric-change up" id="mAvgChange">+0%</div>
+      </div>
+      <div class="metric-card customers">
+        <div class="metric-icon">👥</div>
+        <div class="metric-label">Клиентов</div>
+        <div class="metric-value" id="mCustomers">0</div>
+        <div class="metric-change up" id="mCustomersChange">+0%</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3>📈 Выручка по дням (7 дней)</h3>
+        <canvas class="chart-canvas" id="revenueChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>🏆 Топ блюд</h3>
+        <canvas class="chart-canvas" id="topDishesChart"></canvas>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3>📦 Последние заказы</h3>
+        <table>
+          <thead><tr><th>#</th><th>Клиент</th><th>Сумма</th><th>Статус</th><th>Время</th></tr></thead>
+          <tbody id="recentOrdersTable"></tbody>
+        </table>
+      </div>
+      <div class="chart-card">
+        <h3>🔥 Популярные категории</h3>
+        <canvas class="chart-canvas" id="categoryChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ЗАКАЗЫ ===== -->
+  <div class="screen" id="page-orders">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Заказы</div>
+        <div class="page-subtitle">Управление текущими и прошлыми заказами</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" onclick="showNewOrderModal()"><i class="fas fa-plus"></i> Новый заказ</button>
+      </div>
+    </div>
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Все заказы</h3>
+        <div style="display:flex;gap:8px;">
+          <select id="orderFilter" class="table-search" style="width:140px;" onchange="renderOrders()">
+            <option value="all">Все статусы</option>
+            <option value="new">Новые</option>
+            <option value="cooking">Готовятся</option>
+            <option value="ready">Готовы</option>
+            <option value="delivered">Доставлены</option>
+          </select>
+          <input class="table-search" placeholder="Поиск по клиенту..." id="orderSearch" oninput="renderOrders()">
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>Клиент</th><th>Телефон</th><th>Блюда</th><th>Сумма</th><th>Статус</th><th>Дата</th><th>Действия</th></tr></thead>
+        <tbody id="ordersTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== МЕНЮ ===== -->
+  <div class="screen" id="page-menu">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Меню</div>
+        <div class="page-subtitle">Управление блюдами и категориями</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" onclick="showDishModal()"><i class="fas fa-plus"></i> Добавить блюдо</button>
+      </div>
+    </div>
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Все блюда (<span id="dishCount">0</span>)</h3>
+        <div style="display:flex;gap:8px;">
+          <select id="menuFilter" class="table-search" style="width:140px;" onchange="renderMenuTable()">
+            <option value="all">Все категории</option>
+            <option value="шашлык">Шашлык</option>
+            <option value="крылья">Крылья</option>
+            <option value="кебаб">Кебаб</option>
+            <option value="салаты">Салаты</option>
+            <option value="гарниры">Гарниры</option>
+            <option value="десерты">Десерты</option>
+            <option value="напитки">Напитки</option>
+          </select>
+          <input class="table-search" placeholder="Найти блюдо..." id="menuSearch" oninput="renderMenuTable()">
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Фото</th><th>Название</th><th>Категория</th><th>Цена</th><th>Тег</th><th>Действия</th></tr></thead>
+        <tbody id="menuTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== ПРОМОКОДЫ ===== -->
+  <div class="screen" id="page-promos">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Промокоды</div>
+        <div class="page-subtitle">Создание и управление промокодами</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" onclick="showPromoModal()"><i class="fas fa-plus"></i> Создать промокод</button>
+      </div>
+    </div>
+    <div class="table-card">
+      <table>
+        <thead><tr><th>Код</th><th>Описание</th><th>Скидка</th><th>Активен</th><th>Использований</th><th>Действия</th></tr></thead>
+        <tbody id="promosTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== КЛИЕНТЫ ===== -->
+  <div class="screen" id="page-customers">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Клиенты</div>
+        <div class="page-subtitle">База данных клиентов и их активность</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-outline" onclick="exportCustomersCSV()"><i class="fas fa-download"></i> Экспорт</button>
+      </div>
+    </div>
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Все клиенты</h3>
+        <input class="table-search" placeholder="Поиск клиента..." id="customerSearch" oninput="renderCustomers()">
+      </div>
+      <table>
+        <thead><tr><th>Имя</th><th>Телефон</th><th>Заказов</th><th>Потрачено</th><th>Угольки</th><th>Ранг</th><th>Последний визит</th></tr></thead>
+        <tbody id="customersTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== СЕГМЕНТЫ ===== -->
+  <div class="screen" id="page-segments">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Сегменты клиентов</div>
+        <div class="page-subtitle">Группируйте клиентов и возвращайте их</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" onclick="showSegmentModal()"><i class="fas fa-plus"></i> Создать сегмент</button>
+      </div>
+    </div>
+
+    <!-- Готовые сегменты -->
+    <div style="margin-bottom:20px;">
+      <h3 style="font-family:'Montserrat';font-weight:700;font-size:15px;margin-bottom:14px;">📊 Готовые сегменты</h3>
+      <div class="segment-grid" id="builtinSegments"></div>
+    </div>
+
+    <!-- Пользовательские сегменты -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Мои сегменты</h3>
+      </div>
+      <table>
+        <thead><tr><th>Название</th><th>Условие</th><th>Клиентов</th><th>Действия</th></tr></thead>
+        <tbody id="customSegmentsTable"></tbody>
+      </table>
+    </div>
+
+    <!-- Детали выбранного сегмента -->
+    <div class="table-card" id="segmentDetail" style="display:none;">
+      <div class="table-header">
+        <h3 id="segmentDetailTitle">Клиенты сегмента</h3>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary btn-sm" onclick="openMessageModal()"><i class="fas fa-paper-plane"></i> Написать сегменту</button>
+          <button class="btn btn-outline btn-sm" onclick="exportSegmentCSV()"><i class="fas fa-download"></i> Экспорт CSV</button>
+          <button class="btn btn-sm btn-outline" onclick="closeSegmentDetail()">Закрыть</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Имя</th><th>Телефон</th><th>Заказов</th><th>Потрачено</th><th>Последний визит</th></tr></thead>
+        <tbody id="segmentDetailTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+<div class="modal-overlay" id="dishModal">
+  <div class="modal-box">
+    <h3 id="dishModalTitle">Новое блюдо</h3>
+    <input type="hidden" id="dishEditId">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Название</label>
+        <input id="dishName" placeholder="Шашлык из...">
+      </div>
+      <div class="form-group">
+        <label>Категория</label>
+        <select id="dishCat">
+          <option value="шашлык">Шашлык</option>
+          <option value="крылья">Крылья</option>
+          <option value="кебаб">Кебаб</option>
+          <option value="салаты">Салаты</option>
+          <option value="гарниры">Гарниры</option>
+          <option value="десерты">Десерты</option>
+          <option value="напитки">Напитки</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Описание</label>
+      <input id="dishDesc" placeholder="Сочный шашлык на углях...">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Цена (₽)</label>
+        <input id="dishPrice" type="number" placeholder="450">
+      </div>
+      <div class="form-group">
+        <label>Тег</label>
+        <select id="dishTag">
+          <option value="">Без тега</option>
+          <option value="hit">🔥 Хит</option>
+          <option value="new">🆕 Новинка</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Эмодзи</label>
+        <input id="dishEmoji" placeholder="🥩">
+      </div>
+      <div class="form-group">
+        <label>URL фото</label>
+        <input id="dishImg" placeholder="https://...">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('dishModal')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveDish()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ МОДАЛКА ПРОМО ============ -->
+<div class="modal-overlay" id="promoModal">
+  <div class="modal-box">
+    <h3 id="promoModalTitle">Новый промокод</h3>
+    <input type="hidden" id="promoEditId">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Код</label>
+        <input id="promoCode" placeholder="SPARK10" style="text-transform:uppercase;">
+      </div>
+      <div class="form-group">
+        <label>Тип скидки</label>
+        <select id="promoType">
+          <option value="percent">Процент (%)</option>
+          <option value="fixed">Фиксированная сумма (₽)</option>
+          <option value="coal">Угольки (+🔥)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Значение</label>
+        <input id="promoValue" type="number" placeholder="10">
+      </div>
+      <div class="form-group">
+        <label>Минимальный заказ (₽)</label>
+        <input id="promoMin" type="number" placeholder="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Описание</label>
+      <input id="promoDesc" placeholder="Скидка 10% на весь заказ">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('promoModal')">Отмена</button>
+      <button class="btn btn-primary" onclick="savePromo()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ МОДАЛКА ЗАКАЗА ============ -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal-box">
+    <h3 id="orderModalTitle">Новый заказ</h3>
+    <input type="hidden" id="orderEditId">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Клиент</label>
+        <input id="orderClient" placeholder="Имя клиента">
+      </div>
+      <div class="form-group">
+        <label>Телефон</label>
+        <input id="orderPhone" placeholder="+7 (999) 123-45-67">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Адрес доставки</label>
+      <input id="orderAddress" placeholder="ул. Пушкина, д. 10">
+    </div>
+    <div class="form-group">
+      <label>Блюда (через запятую: ID×кол-во)</label>
+      <input id="orderItems" placeholder="1×2, 3×1, 7×3">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Способ получения</label>
+        <select id="orderType">
+          <option value="delivery">Доставка</option>
+          <option value="pickup">Самовывоз</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Статус</label>
+        <select id="orderStatus">
+          <option value="new">Новый</option>
+          <option value="cooking">Готовится</option>
+          <option value="ready">Готов</option>
+          <option value="delivered">Доставлен</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('orderModal')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveOrder()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ МОДАЛКА СЕГМЕНТА ============ -->
+<div class="modal-overlay" id="segmentModal">
+  <div class="modal-box">
+    <h3>Новый сегмент</h3>
+    <div class="form-group">
+      <label>Название</label>
+      <input id="segName" placeholder="Мои VIP-клиенты">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Условие</label>
+        <select id="segCondition">
+          <option value="orders_more">Заказов больше или равно</option>
+          <option value="orders_less">Заказов меньше или равно</option>
+          <option value="spent_more">Потратили больше</option>
+          <option value="spent_less">Потратили меньше</option>
+          <option value="inactive_days">Не заходили (дней) больше</option>
+          <option value="active_days">Заходили (дней) меньше</option>
+          <option value="coal_more">Угольков больше</option>
+          <option value="avg_check_more">Средний чек больше</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Значение</label>
+        <input id="segValue" type="number" placeholder="3">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('segmentModal')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveSegment()">Создать</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ МОДАЛКА СООБЩЕНИЯ ============ -->
+<div class="modal-overlay" id="messageModal">
+  <div class="modal-box" style="max-width:560px;">
+    <h3>📨 Написать сегменту</h3>
+    <div id="messagePreview" style="background:#f9f7f4;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--muted);">
+      Получатели: <b id="messageRecipients">0</b> клиентов
+    </div>
+
+    <div class="form-group">
+      <label>Шаблон сообщения</label>
+      <div class="msg-templates" id="msgTemplates">
+        <div class="msg-tpl" onclick="applyTemplate('promo')" data-tpl="promo">
+          <span class="tpl-icon">🎁</span>
+          <span class="tpl-text">Промо-акция</span>
+        </div>
+        <div class="msg-tpl" onclick="applyTemplate('winback')" data-tpl="winback">
+          <span class="tpl-icon">💔</span>
+          <span class="tpl-text">Вернуть клиента</span>
+        </div>
+        <div class="msg-tpl" onclick="applyTemplate('thankyou')" data-tpl="thankyou">
+          <span class="tpl-icon">🙏</span>
+          <span class="tpl-text">Благодарность</span>
+        </div>
+        <div class="msg-tpl" onclick="applyTemplate('birthday')" data-tpl="birthday">
+          <span class="tpl-icon">🎂</span>
+          <span class="tpl-text">День рождения</span>
+        </div>
+        <div class="msg-tpl" onclick="applyTemplate('newdish')" data-tpl="newdish">
+          <span class="tpl-icon">🆕</span>
+          <span class="tpl-text">Новинка в меню</span>
+        </div>
+        <div class="msg-tpl" onclick="applyTemplate('coal')" data-tpl="coal">
+          <span class="tpl-icon">🔥</span>
+          <span class="tpl-text">Напоминание об угольках</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Текст сообщения</label>
+      <textarea id="messageText" rows="5" placeholder="Здравствуйте! У нас для вас специальное предложение..."></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Канал доставки</label>
+        <select id="messageChannel">
+          <option value="push">🔔 Push-уведомление</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Задержка (сек)</label>
+        <select id="messageDelay">
+          <option value="0">Отправить сразу</option>
+          <option value="60">Через 1 мин</option>
+          <option value="300">Через 5 мин</option>
+          <option value="3600">Через 1 час</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="background:#f9f7f4;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;">
+      <div style="display:flex;gap:12px;">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+          <input type="checkbox" id="msgAttachPromo" onchange="updateMessagePreview()"> 🎫 Прикрепить промокод
+        </label>
+        <select id="msgPromoSelect" style="flex:1;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:11px;" disabled>
+          <option value="">Выберите промокод</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Превью -->
+    <div class="msg-preview-box" id="msgPreviewBox" style="display:none;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">📱 Превью сообщения:</div>
+      <div class="msg-preview-content" id="msgPreviewContent"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('messageModal')">Отмена</button>
+      <button class="btn btn-outline" onclick="previewMessage()"><i class="fas fa-eye"></i> Превью</button>
+      <button class="btn btn-primary" onclick="sendMessage()"><i class="fas fa-paper-plane"></i> Отправить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ИСТОРИЯ РАССЫЛОК ============ -->
+<div class="screen" id="page-messages">
+  <div class="page-header">
+    <div>
+      <div class="page-title">История рассылок</div>
+      <div class="page-subtitle">Все отправленные сообщения клиентам</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" onclick="exportMessagesCSV()"><i class="fas fa-download"></i> Экспорт</button>
+    </div>
+  </div>
+  <div class="table-card">
+    <div class="table-header">
+      <h3>Отправленные</h3>
+      <div style="display:flex;gap:8px;">
+        <select id="msgFilter" class="table-search" style="width:140px;" onchange="renderMessages()">
+          <option value="all">Все</option>
+          <option value="sent">Отправлено</option>
+          <option value="delivered">Доставлено</option>
+          <option value="read">Прочитано</option>
+          <option value="failed">Ошибка</option>
+        </select>
+        <input class="table-search" placeholder="Поиск..." id="msgSearch" oninput="renderMessages()">
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>ID</th><th>Сегмент</th><th>Канал</th><th>Текст</th><th>Получателей</th><th>Статус</th><th>Дата</th><th>Действия</th></tr></thead>
+      <tbody id="messagesTable"></tbody>
+    </table>
+  </div>
+
+  <!-- Детали рассылки -->
+  <div class="table-card" id="msgDetail" style="display:none;">
+    <div class="table-header">
+      <h3 id="msgDetailTitle">Детали рассылки</h3>
+      <button class="btn btn-sm btn-outline" onclick="$('#msgDetail').style.display='none'">Закрыть</button>
+    </div>
+    <div style="padding:16px 20px;">
+      <div id="msgDetailContent" style="background:#f9f7f4;border-radius:12px;padding:14px;font-size:13px;line-height:1.5;white-space:pre-wrap;margin-bottom:14px;"></div>
+      <table>
+        <thead><tr><th>Имя</th><th>Телефон</th><th>Статус</th></tr></thead>
+        <tbody id="msgDetailRecipients"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+/* ============================================================
+   ПОЛИФИЛЛЫ
+   ============================================================ */
+if(!CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+    if(typeof r==="number")r=[r,r,r,r];
+    if(!Array.isArray(r))r=[4,4,4,4];
+    let[tl,tr,br,bl]=r;
+    if(w<2*tl)tl=w/2;if(w<2*tr)tr=w/2;if(h<2*br)br=h/2;if(h<2*bl)bl=h/2;
+    this.moveTo(x+tl,y);
+    this.arcTo(x+w,y,x+w,y+h,tr);
+    this.arcTo(x+w,y+h,x,y+h,br);
+    this.arcTo(x,y+h,x,y,bl);
+    this.arcTo(x,y,x+w,y,tl);
+    this.closePath();
+    return this;
+  };
+}
+/* ============================================================
+   ДАННЫЕ
+   ============================================================ */
+const DISHES_DEFAULT = [
+  {id:1,name:"Шашлык из свинины",cat:"шашлык",desc:"Сочный шашлык на углях, 200г",price:450,tag:"hit",emoji:"🥩",img:"https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80"},
+  {id:2,name:"Шашлык из курицы",cat:"шашлык",desc:"Маринованная курица, 200г",price:420,tag:null,emoji:"🍗",img:"https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=400&q=80"},
+  {id:3,name:"Шашлык из баранины",cat:"шашлык",desc:"Нежная баранина с луком, 200г",price:520,tag:"hit",emoji:"🍖",img:"https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80"},
+  {id:4,name:"Шашлык из индейки",cat:"шашлык",desc:"Диетическое мясо на гриле, 200г",price:430,tag:"new",emoji:"🍗",img:"https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=400&q=80"},
+  {id:5,name:"Крылья BBQ (6 шт)",cat:"крылья",desc:"Острые крылышки в фирменном соусе",price:390,tag:"hit",emoji:"🍗",img:"https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=400&q=80"},
+  {id:6,name:"Крылья в медовом соусе",cat:"крылья",desc:"Сладко-острые крылышки, 6 шт",price:410,tag:null,emoji:"🍯",img:"https://images.unsplash.com/photo-1608039755401-742074f0548d?w=400&q=80"},
+  {id:7,name:"Крылья «Дымные»",cat:"крылья",desc:"Копчёные крылышки с паприкой, 8 шт",price:460,tag:"new",emoji:"🔥",img:"https://images.unsplash.com/photo-1527477396000-e27163b4b7e5?w=400&q=80"},
+  {id:8,name:"Кебаб в лаваше",cat:"кебаб",desc:"Говядина, овощи, соус",price:350,tag:"new",emoji:"🌯",img:"https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?w=400&q=80"},
+  {id:9,name:"Кебаб куриный",cat:"кебаб",desc:"Куриное филе с овощами в лаваше",price:330,tag:null,emoji:"🌯",img:"https://images.unsplash.com/photo-1561651823-34feb02250e4?w=400&q=80"},
+  {id:10,name:"Шаурма классик",cat:"кебаб",desc:"Свиное мясо, свежие овощи, соус",price:370,tag:"hit",emoji:"🥙",img:"https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=400&q=80"},
+  {id:11,name:"Овощи на гриле",cat:"салаты",desc:"Перец, баклажан, кабачок",price:290,tag:null,emoji:"🥒",img:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80"},
+  {id:12,name:"Греческий салат",cat:"салаты",desc:"Свежие овощи, оливки, фета",price:320,tag:null,emoji:"🥗",img:"https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&q=80"},
+  {id:13,name:"Салат «Цезарь»",cat:"салаты",desc:"Романо, курица гриль, пармезан",price:380,tag:"hit",emoji:"🥗",img:"https://images.unsplash.com/photo-1551248429-40975aa4de74?w=400&q=80"},
+  {id:14,name:"Фирменный соус «Уголёк»",cat:"салаты",desc:"Острый томатный соус",price:90,tag:null,emoji:"🥫",img:"https://images.unsplash.com/photo-1631898039984-f4e2f5d27303?w=400&q=80"},
+  {id:15,name:"Соус «Дымок»",cat:"салаты",desc:"Копчёный барбекю-соус",price:110,tag:null,emoji:"🍯",img:"https://images.unsplash.com/photo-1606756790138-261d2b21cd75?w=400&q=80"},
+  {id:16,name:"Соус «Чесночный»",cat:"салаты",desc:"Нежный чесночный соус, 50мл",price:80,tag:"new",emoji:"🧄",img:"https://images.unsplash.com/photo-1472476443507-c7a5948772fc?w=400&q=80"},
+  {id:17,name:"Лимонад «Искра»",cat:"напитки",desc:"Домашний цитрусовый лимонад",price:190,tag:"new",emoji:"🍋",img:"https://images.unsplash.com/photo-1437418747212-8d9709afab22?w=400&q=80"},
+  {id:18,name:"Комбуча «Пламя»",cat:"напитки",desc:"Игристый чайный напиток",price:220,tag:null,emoji:"🍵",img:"https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80"},
+  {id:19,name:"Кола / Спрайт",cat:"напитки",desc:"Классический газированный напиток",price:150,tag:null,emoji:"🥤",img:"https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80"},
+  {id:20,name:"Пиво нефильтрованное",cat:"напитки",desc:"Светлый нефильтрат 0.4л",price:280,tag:"hit",emoji:"🍺",img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&q=80"},
+  {id:21,name:"Свежевыжатый сок",cat:"напитки",desc:"Апельсин или яблоко, 250мл",price:200,tag:null,emoji:"🍊",img:"https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400&q=80"},
+  {id:22,name:"Картофель фри",cat:"гарниры",desc:"Хрустящий картофель с специями",price:180,tag:null,emoji:"🍟",img:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80"},
+  {id:23,name:"Картофель по-деревенски",cat:"гарниры",desc:"С хрустящей корочкой и чесноком",price:200,tag:"hit",emoji:"🥔",img:"https://images.unsplash.com/photo-1596560548464-f010549b84d7?w=400&q=80"},
+  {id:24,name:"Рис с овощами",cat:"гарниры",desc:"Большой рис с сезонными овощами",price:160,tag:null,emoji:"🍚",img:"https://images.unsplash.com/photo-1512058564366-18510be2db87?w=400&q=80"},
+  {id:25,name:"Лаваш с чесноком",cat:"гарниры",desc:"Свежий лаваш с чесночной начинкой",price:120,tag:null,emoji:"🫓",img:"https://images.unsplash.com/photo-1586444248879-bc604cbd555a?w=400&q=80"},
+  {id:26,name:"Хачапури",cat:"гарниры",desc:"Грузинская лепёшка с сыром",price:250,tag:"new",emoji:"🧀",img:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80"},
+  {id:27,name:"Чизкейк «Уголёк»",cat:"десерты",desc:"Сливочный чизкейк с карамелью",price:280,tag:"hit",emoji:"🍰",img:"https://images.unsplash.com/photo-1567171466295-4afa63d45416?w=400&q=80"},
+  {id:28,name:"Шоколадный фондан",cat:"десерты",desc:"Тёплый шоколад с мороженым",price:320,tag:"new",emoji:"🍫",img:"https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?w=400&q=80"},
+  {id:29,name:"Мороженое (2 шарика)",cat:"десерты",desc:"Ваниль + шоколад или клубника",price:170,tag:null,emoji:"🍨",img:"https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=400&q=80"},
+];
+
+const PROMOS_DEFAULT = [
+  {id:1,code:"SPARK10",type:"percent",value:10,min:0,desc:"Скидка 10% на весь заказ",active:true,used:24},
+  {id:2,code:"FIRE500",type:"fixed",value:500,min:2000,desc:"−500₽ при заказе от 2000₽",active:true,used:8},
+  {id:3,code:"UGOL100",type:"coal",value:100,min:0,desc:"+100 Угольков на баланс",active:true,used:42},
+  {id:4,code:"GRILL20",type:"percent",value:20,min:1500,desc:"Скидка 20% при заказе от 1500₽",active:false,used:15},
+];
+
+const NAMES = ["Алексей","Мария","Дмитрий","Анна","Сергей","Елена","Иван","Ольга","Максим","Наталья","Павел","Татьяна","Артём","Ирина","Роман","Светлана","Андрей","Юлия","Кирилл","Виктория","Олег","Екатерина","Никита","Дарья","Тимур","Анастасия","Михаил","Полина","Владимир","Ксения","Степан","Валерия","Глеб","Алёна","Захар","Маргарита"];
+const PHONES = ["+7(903)111-22-33","+7(916)222-33-44","+7(925)333-44-55","+7(905)444-55-66","+7(915)555-66-77","+7(926)666-77-88","+7(909)777-88-99","+7(910)888-99-00","+7(917)999-00-11","+7(929)000-11-22","+7(903)123-45-67","+7(916)765-43-21","+7(925)111-99-88","+7(905)222-77-66","+7(915)333-55-44"];
+const ADDRESSES = ["ул. Пушкина, д.10","ул. Ленина, д.25","пр. Мира, д.7","ул. Гагарина, д.3","ул. Чехова, д.15","ул. Толстого, д.8","пр. Победы, д.42","ул. Садовая, д.19","ул. Маяковского, d.5","ул. Лермонтова, д.12"];
+
+let dishes, promos, orders, customers;
+
+function loadData(){
+  try{
+    const d = JSON.parse(localStorage.getItem("admin_dishes"));
+    dishes = d && d.length ? d : [...DISHES_DEFAULT];
+  }catch(e){ dishes = [...DISHES_DEFAULT]; }
+  try{
+    const p = JSON.parse(localStorage.getItem("admin_promos"));
+    promos = p && p.length ? p : [...PROMOS_DEFAULT];
+  }catch(e){ promos = [...PROMOS_DEFAULT]; }
+  try{
+    const o = JSON.parse(localStorage.getItem("admin_orders"));
+    orders = o && o.length ? o : [];
+  }catch(e){ orders = []; }
+  try{
+    const c = JSON.parse(localStorage.getItem("admin_customers"));
+    customers = c && c.length ? c : [];
+  }catch(e){ customers = []; }
+}
+function saveAll(){
+  localStorage.setItem("admin_dishes", JSON.stringify(dishes));
+  localStorage.setItem("admin_promos", JSON.stringify(promos));
+  localStorage.setItem("admin_orders", JSON.stringify(orders));
+  localStorage.setItem("admin_customers", JSON.stringify(customers));
+}
+
+/* ============================================================
+   УТИЛИТЫ
+   ============================================================ */
+function $(s){return document.querySelector(s);}
+function $$(s){return document.querySelectorAll(s);}
+function fmt(n){return n.toLocaleString("ru-RU")+"₽";}
+function fmtDate(d){
+  const dt=new Date(d);
+  const dd=String(dt.getDate()).padStart(2,"0");
+  const mm=String(dt.getMonth()+1).padStart(2,"0");
+  const hh=String(dt.getHours()).padStart(2,"0");
+  const mi=String(dt.getMinutes()).padStart(2,"0");
+  return `${dd}.${mm} ${hh}:${mi}`;
+}
+
+function showToast(msg, isError){
+  const s=$("#toastStack");
+  const t=document.createElement("div");
+  t.className="toast"+(isError?" error":"");
+  t.innerHTML=`<span>${isError?"❌":"✅"}</span><span>${msg}</span>`;
+  s.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+
+function closeModal(id){$("#"+id).classList.remove("show");}
+
+/* ============================================================
+   ЛОГИН
+   ============================================================ */
+function doLogin(){
+  const u=$("#loginUser").value;
+  const p=$("#loginPass").value;
+  if(u==="admin" && p==="admin"){
+    localStorage.setItem("admin_logged","1");
+    $("#loginOverlay").classList.add("hidden");
+    init();
+  } else {
+    $("#loginError").style.display="block";
+  }
+}
+function doLogout(){
+  localStorage.removeItem("admin_logged");
+  location.reload();
+}
+document.addEventListener("keydown",e=>{
+  if(e.key==="Enter" && !$("#loginOverlay").classList.contains("hidden")) doLogin();
+  if(e.key==="Escape"){
+    $$(".modal-overlay.show").forEach(m=>m.classList.remove("show"));
+    const sb=$("#sidebar");
+    if(sb&&sb.classList.contains("open")){
+      sb.classList.remove("open");
+      $("#sidebarBackdrop").classList.remove("show");
+      document.body.style.overflow="";
+    }
+  }
+});
+
+/* ============================================================
+   НАВИГАЦИЯ
+   ============================================================ */
+function toggleSidebar(){
+  const sb=$("#sidebar");
+  const bd=$("#sidebarBackdrop");
+  const isOpen=sb.classList.toggle("open");
+  bd.classList.toggle("show",isOpen);
+  document.body.style.overflow=isOpen?"hidden":"";
+}
+function showPage(name){
+  $$(".screen").forEach(s=>s.classList.remove("active"));
+  $("#page-"+name).classList.add("active");
+  $$(".nav-item").forEach(n=>n.classList.toggle("active",n.dataset.page===name));
+  // Закрываем сайдбар на мобилке
+  if(window.innerWidth<=768){
+    $("#sidebar").classList.remove("open");
+    $("#sidebarBackdrop").classList.remove("show");
+  }
+  // Обновляем имя страницы в мобильном topbar
+  const names={dashboard:"Дашборд",orders:"Заказы",menu:"Меню",promos:"Промокоды",customers:"Клиенты",segments:"Сегменты",messages:"Рассылки"};
+  const mpn=$("#mobilePageName");
+  if(mpn) mpn.textContent=names[name]||name;
+  if(name==="dashboard") renderDashboard();
+  if(name==="orders") renderOrders();
+  if(name==="menu") renderMenuTable();
+  if(name==="promos") renderPromos();
+  if(name==="customers") renderCustomers();
+  if(name==="segments") renderSegments();
+}
+
+/* ============================================================
+   ДАШБОРД
+   ============================================================ */
+function renderDashboard(){
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0,10);
+  const todayOrders = orders.filter(o=>o.date.slice(0,10)===todayStr);
+  const revenue = todayOrders.reduce((s,o)=>s+o.total,0);
+  const avg = todayOrders.length ? Math.round(revenue/todayOrders.length) : 0;
+
+  $("#mRevenue").textContent = fmt(revenue);
+  $("#mOrders").textContent = todayOrders.length;
+  $("#mAvg").textContent = fmt(avg);
+  $("#mCustomers").textContent = customers.length;
+
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate()-1);
+  const yesterdayStr = yesterday.toISOString().slice(0,10);
+  const yOrders = orders.filter(o=>o.date.slice(0,10)===yesterdayStr);
+  const yRevenue = yOrders.reduce((s,o)=>s+o.total,0);
+  if(yRevenue>0) {
+    const pct = Math.round(((revenue-yRevenue)/yRevenue)*100);
+    $("#mRevenueChange").textContent = (pct>=0?"+":"")+pct+"%";
+    $("#mRevenueChange").className = "metric-change " + (pct>=0?"up":"down");
+  }
+
+  requestAnimationFrame(()=>{
+    drawRevenueChart();
+    drawTopDishesChart();
+    drawCategoryChart();
+  });
+  renderRecentOrders();
+}
+
+function drawRevenueChart(){
+  const canvas=$("#revenueChart");
+  const ctx=canvas.getContext("2d");
+  canvas.width=canvas.offsetWidth*2;canvas.height=440;
+  ctx.scale(2,2);
+  const w=canvas.offsetWidth,h=220;
+  ctx.clearRect(0,0,w,h);
+
+  const days=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(Date.now()-i*86400000);
+    const ds=d.toISOString().slice(0,10);
+    const sum=orders.filter(o=>o.date.slice(0,10)===ds).reduce((s,o)=>s+o.total,0);
+    days.push({label:d.getDate()+"."+(d.getMonth()+1),sum});
+  }
+  const max=Math.max(...days.map(d=>d.sum),1);
+
+  const pad={t:20,r:20,b:40,l:60};
+  const gw=w-pad.l-pad.r, gh=h-pad.t-pad.b;
+
+  // Grid
+  ctx.strokeStyle="#ece8e2";ctx.lineWidth=.5;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+gh*(i/4);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();
+    ctx.fillStyle="#8a8580";ctx.font="11px Inter";
+    ctx.textAlign="right";ctx.fillText(fmt(Math.round(max*(1-i/4))),pad.l-8,y+4);
+  }
+
+  // Bars
+  const bw=gw/7*.55;
+  days.forEach((d,i)=>{
+    const x=pad.l+(gw/7)*(i+.5)-bw/2;
+    const bh=(d.sum/max)*gh;
+    const y=pad.t+gh-bh;
+
+    const grad=ctx.createLinearGradient(x,y,x,pad.t+gh);
+    grad.addColorStop(0,"#ff5e3a");grad.addColorStop(1,"#ff9500");
+    ctx.fillStyle=grad;
+    ctx.beginPath();
+    ctx.roundRect(x,y,bw,bh,[6,6,0,0]);
+    ctx.fill();
+
+    ctx.fillStyle="#1a1a1a";ctx.font="600 11px Inter";ctx.textAlign="center";
+    ctx.fillText(d.label,x+bw/2,h-pad.b+18);
+  });
+}
+
+function drawTopDishesChart(){
+  const canvas=$("#topDishesChart");
+  const ctx=canvas.getContext("2d");
+  canvas.width=canvas.offsetWidth*2;canvas.height=440;
+  ctx.scale(2,2);
+  const w=canvas.offsetWidth,h=220;
+  ctx.clearRect(0,0,w,h);
+
+  const counts={};
+  orders.forEach(o=>{
+    o.items.forEach(it=>{
+      counts[it.name]=(counts[it.name]||0)+it.qty;
+    });
+  });
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  if(!sorted.length){ctx.fillStyle="#8a8580";ctx.font="14px Inter";ctx.textAlign="center";ctx.fillText("Нет данных",w/2,h/2);return;}
+
+  const max=sorted[0][1];
+  const barH=28,gap=8;
+  sorted.forEach(([name,count],i)=>{
+    const y=i*(barH+gap)+10;
+    const bw=(count/max)*(w-120);
+
+    ctx.fillStyle="#f0e8de";
+    ctx.beginPath();ctx.roundRect(100,y,w-130,barH,[6]);ctx.fill();
+
+    const grad=ctx.createLinearGradient(100,y,100+bw,y);
+    grad.addColorStop(0,"#ff5e3a");grad.addColorStop(1,"#ff9500");
+    ctx.fillStyle=grad;
+    ctx.beginPath();ctx.roundRect(100,y,bw,barH,[6]);ctx.fill();
+
+    ctx.fillStyle="#1a1a1a";ctx.font="600 11px Inter";ctx.textAlign="right";
+    const shortName=name.length>12?name.slice(0,12)+"…":name;
+    ctx.fillText(shortName,94,y+18);
+
+    ctx.fillStyle="#fff";ctx.font="700 11px Inter";ctx.textAlign="left";
+    if(bw>30) ctx.fillText(count,106,y+18);
+  });
+}
+
+function drawCategoryChart(){
+  const canvas=$("#categoryChart");
+  const ctx=canvas.getContext("2d");
+  canvas.width=canvas.offsetWidth*2;canvas.height=440;
+  ctx.scale(2,2);
+  const w=canvas.offsetWidth,h=220;
+  ctx.clearRect(0,0,w,h);
+
+  const counts={};
+  orders.forEach(o=>{
+    o.items.forEach(it=>{
+      const dish=dishes.find(d=>d.name===it.name);
+      if(dish) counts[dish.cat]=(counts[dish.cat]||0)+it.qty;
+    });
+  });
+  const entries=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  if(!entries.length){ctx.fillStyle="#8a8580";ctx.font="14px Inter";ctx.textAlign="center";ctx.fillText("Нет данных",w/2,h/2);return;}
+
+  const total=entries.reduce((s,e)=>s+e[1],0);
+  const colors=["#ff5e3a","#ff9500","#ffc83d","#3fbf38","#3388ff","#9b59b6","#1a1a1a"];
+  const cx=w/2,cy=h/2-5,r=Math.min(w,h)/2-30;
+  let startAngle=-Math.PI/2;
+
+  entries.forEach(([cat,count],i)=>{
+    const slice=count/total*Math.PI*2;
+    ctx.beginPath();ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,startAngle,startAngle+slice);
+    ctx.closePath();
+    ctx.fillStyle=colors[i%colors.length];ctx.fill();
+    ctx.strokeStyle="#fff";ctx.lineWidth=2;ctx.stroke();
+
+    const mid=startAngle+slice/2;
+    const lx=cx+r*.65*Math.cos(mid);
+    const ly=cy+r*.65*Math.sin(mid);
+    ctx.fillStyle="#fff";ctx.font="bold 12px Inter";ctx.textAlign="center";
+    if(slice>.3) ctx.fillText(Math.round(count/total*100)+"%",lx,ly+4);
+
+    startAngle+=slice;
+  });
+
+  entries.forEach(([cat,count],i)=>{
+    const y=h-15;
+    const x=10+i*(w-20)/entries.length;
+    ctx.fillStyle=colors[i%colors.length];
+    ctx.beginPath();ctx.roundRect(x,y-8,10,10,[2]);ctx.fill();
+    ctx.fillStyle="#1a1a1a";ctx.font="500 10px Inter";ctx.textAlign="left";
+    ctx.fillText(cat,x+14,y+1);
+  });
+}
+
+function renderRecentOrders(){
+  const recent=[...orders].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+  $("#recentOrdersTable").innerHTML=recent.map(o=>{
+    const statusCls={new:"status-new",cooking:"status-cooking",ready:"status-ready",delivered:"status-delivered",cancelled:"status-cancelled"};
+    const statusTxt={new:"Новый",cooking:"Готовится",ready:"Готов",delivered:"Доставлен",cancelled:"Отменён"};
+    return `<tr>
+      <td data-label="#">${o.id}</td><td data-label="Клиент">${o.client}</td><td data-label="Сумма">${fmt(o.total)}</td>
+      <td data-label="Статус"><span class="status-badge ${statusCls[o.status]}">${statusTxt[o.status]}</span></td>
+      <td data-label="Время">${fmtDate(o.date)}</td></tr>`;
+  }).join("");
+}
+
+/* ============================================================
+   ЗАКАЗЫ
+   ============================================================ */
+function renderOrders(){
+  const filter=$("#orderFilter").value;
+  const search=$("#orderSearch").value.toLowerCase();
+  let list=[...orders].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(filter!=="all") list=list.filter(o=>o.status===filter);
+  if(search) list=list.filter(o=>o.client.toLowerCase().includes(search)||o.phone.includes(search));
+
+  const statusCls={new:"status-new",cooking:"status-cooking",ready:"status-ready",delivered:"status-delivered",cancelled:"status-cancelled"};
+  const statusTxt={new:"Новый",cooking:"Готовится",ready:"Готов",delivered:"Доставлен",cancelled:"Отменён"};
+
+  $("#ordersTable").innerHTML=list.map(o=>`<tr>
+    <td data-label="#">${o.id}</td><td data-label="Клиент"><b>${o.client}</b></td><td data-label="Телефон">${o.phone}</td>
+    <td data-label="Блюда" style="font-size:12px;max-width:180px;">${o.items.map(i=>i.name+"×"+i.qty).join(", ")}</td>
+    <td data-label="Сумма"><b>${fmt(o.total)}</b></td>
+    <td data-label="Статус"><span class="status-badge ${statusCls[o.status]}">${statusTxt[o.status]}</span></td>
+    <td data-label="Дата">${fmtDate(o.date)}</td>
+    <td data-label="Действия">
+      <select class="btn btn-sm btn-outline" style="padding:5px 8px;font-size:11px;" onchange="changeOrderStatus(${o.id},this.value)">
+        <option value="new" ${o.status==="new"?"selected":""}>Новый</option>
+        <option value="cooking" ${o.status==="cooking"?"selected":""}>Готовится</option>
+        <option value="ready" ${o.status==="ready"?"selected":""}>Готов</option>
+        <option value="delivered" ${o.status==="delivered"?"selected":""}>Доставлен</option>
+        <option value="cancelled" ${o.status==="cancelled"?"selected":""}>Отменён</option>
+      </select>
+    </td>
+  </tr>`).join("");
+  $("#ordersBadge").textContent = orders.filter(o=>o.status==="new").length;
+}
+
+function changeOrderStatus(id,status){
+  const o=orders.find(x=>x.id===id);
+  if(o){o.status=status;saveAll();renderOrders();showToast("Статус #"+id+" обновлён");}
+}
+
+function showNewOrderModal(){
+  $("#orderEditId").value="";
+  $("#orderClient").value="";
+  $("#orderPhone").value="";
+  $("#orderAddress").value="";
+  $("#orderItems").value="";
+  $("#orderStatus").value="new";
+  $("#orderModalTitle").textContent="Новый заказ";
+  $("#orderModal").classList.add("show");
+}
+
+function saveOrder(){
+  const client=$("#orderClient").value.trim();
+  const phone=$("#orderPhone").value.trim();
+  const address=$("#orderAddress").value.trim();
+  const itemsStr=$("#orderItems").value.trim();
+  const status=$("#orderStatus").value;
+  const type=$("#orderType").value;
+  if(!client||!phone||!itemsStr){showToast("Заполните все поля","error");return;}
+
+  const items=[];
+  let total=0;
+  itemsStr.split(",").forEach(pair=>{
+    const parts=pair.trim().split(/[×xX*]/);
+    const dishId=parseInt(parts[0]);
+    const qty=parseInt(parts[1])||1;
+    if(isNaN(dishId))return;
+    const dish=dishes.find(d=>d.id===dishId);
+    if(dish){items.push({name:dish.name,price:dish.price,qty});total+=dish.price*qty;}
+  });
+  if(!items.length){showToast("Не найдены блюда","error");return;}
+
+  const editId=$("#orderEditId").value;
+  if(editId){
+    const o=orders.find(x=>x.id===parseInt(editId));
+    if(o){o.client=client;o.phone=phone;o.address=address;o.items=items;o.total=total;o.status=status;o.type=type;}
+  } else {
+    orders.push({id:Date.now()%100000,client,phone,address,items,total,status,type,date:new Date().toISOString()});
+  }
+  saveAll();closeModal("orderModal");renderOrders();showToast("Заказ сохранён");
+}
+
+/* ============================================================
+   МЕНЮ
+   ============================================================ */
+function renderMenuTable(){
+  const filter=$("#menuFilter").value;
+  const search=$("#menuSearch").value.toLowerCase();
+  let list=[...dishes];
+  if(filter!=="all") list=list.filter(d=>d.cat===filter);
+  if(search) list=list.filter(d=>d.name.toLowerCase().includes(search));
+
+  $("#dishCount").textContent=list.length;
+  $("#menuTable").innerHTML=list.map(d=>`<tr>
+    <td data-label="Фото" style="width:48px;height:48px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#ff9500,#ff3333);display:flex;align-items:center;justify-content:center;font-size:22px;">${d.emoji}</td>
+    <td data-label="Название"><b>${d.name}</b><div style="font-size:11px;color:var(--muted);margin-top:2px;">${d.desc}</div></td>
+    <td data-label="Категория">${d.cat}</td><td data-label="Цена"><b>${fmt(d.price)}</b></td>
+    <td data-label="Тег">${d.tag?`<span class="status-badge ${d.tag==="hit"?"status-cooking":"status-new"}">${d.tag==="hit"?"🔥 Хит":"🆕 Новинка"}</span>`:"—"}</td>
+    <td data-label="Действия">
+      <button class="btn btn-sm btn-outline" onclick="editDish(${d.id})"><i class="fas fa-pen"></i></button>
+      <button class="btn btn-sm btn-danger" onclick="deleteDish(${d.id})" style="margin-left:4px;"><i class="fas fa-trash"></i></button>
+    </td>
+  </tr>`).join("");
+}
+
+function showDishModal(dish){
+  $("#dishEditId").value="";
+  $("#dishName").value="";
+  $("#dishCat").value="шашлык";
+  $("#dishDesc").value="";
+  $("#dishPrice").value="";
+  $("#dishTag").value="";
+  $("#dishEmoji").value="";
+  $("#dishImg").value="";
+  $("#dishModalTitle").textContent="Новое блюдо";
+  $("#dishModal").classList.add("show");
+}
+
+function editDish(id){
+  const d=dishes.find(x=>x.id===id);
+  if(!d)return;
+  $("#dishEditId").value=id;
+  $("#dishName").value=d.name;
+  $("#dishCat").value=d.cat;
+  $("#dishDesc").value=d.desc;
+  $("#dishPrice").value=d.price;
+  $("#dishTag").value=d.tag||"";
+  $("#dishEmoji").value=d.emoji;
+  $("#dishImg").value=d.img;
+  $("#dishModalTitle").textContent="Редактировать блюдо";
+  $("#dishModal").classList.add("show");
+}
+
+function saveDish(){
+  const name=$("#dishName").value.trim();
+  const cat=$("#dishCat").value;
+  const desc=$("#dishDesc").value.trim();
+  const price=parseInt($("#dishPrice").value);
+  const tag=$("#dishTag").value||null;
+  const emoji=$("#dishEmoji").value.trim()||"🍽️";
+  const img=$("#dishImg").value.trim()||"";
+  if(!name||!price){showToast("Название и цена обязательны","error");return;}
+
+  const editId=$("#dishEditId").value;
+  if(editId){
+    const d=dishes.find(x=>x.id===parseInt(editId));
+    if(d){Object.assign(d,{name,cat,desc,price,tag,emoji,img});}
+  } else {
+    const maxId=dishes.reduce((m,d)=>Math.max(m,d.id),0);
+    dishes.push({id:maxId+1,name,cat,desc,price,tag,emoji,img});
+  }
+  saveAll();closeModal("dishModal");renderMenuTable();showToast("Блюдо сохранено");
+}
+
+function deleteDish(id){
+  if(!confirm("Удалить блюдо?"))return;
+  dishes=dishes.filter(d=>d.id!==id);
+  saveAll();renderMenuTable();showToast("Блюдо удалено");
+}
+
+/* ============================================================
+   ПРОМОКОДЫ
+   ============================================================ */
+function renderPromos(){
+  $("#promosTable").innerHTML=promos.map(p=>{
+    const valText=p.type==="percent"?p.value+"%":p.type==="fixed"?p.value+"₽":"+"+p.value+"🔥";
+    return `<tr>
+      <td data-label="Код"><b style="color:var(--primary);">${p.code}</b></td>
+      <td data-label="Описание">${p.desc}</td>
+      <td data-label="Скидка"><b>${valText}</b>${p.min?`<div style="font-size:11px;color:var(--muted);">от ${fmt(p.min)}</div>`:""}</td>
+      <td data-label="Активен">${p.active?'<span class="status-badge status-ready">Активен</span>':'<span class="status-badge status-cancelled">Выкл</span>'}</td>
+      <td data-label="Использований">${p.used} раз</td>
+      <td data-label="Действия">
+        <button class="btn btn-sm btn-outline" onclick="togglePromo(${p.id})"><i class="fas fa-power-off"></i></button>
+        <button class="btn btn-sm btn-outline" onclick="editPromo(${p.id})" style="margin-left:4px;"><i class="fas fa-pen"></i></button>
+        <button class="btn btn-sm btn-danger" onclick="deletePromo(${p.id})" style="margin-left:4px;"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+function showPromoModal(){
+  $("#promoEditId").value="";$("#promoCode").value="";$("#promoType").value="percent";
+  $("#promoValue").value="";$("#promoMin").value="";$("#promoDesc").value="";
+  $("#promoModalTitle").textContent="Новый промокод";
+  $("#promoModal").classList.add("show");
+}
+
+function editPromo(id){
+  const p=promos.find(x=>x.id===id);if(!p)return;
+  $("#promoEditId").value=id;$("#promoCode").value=p.code;$("#promoType").value=p.type;
+  $("#promoValue").value=p.value;$("#promoMin").value=p.min;$("#promoDesc").value=p.desc;
+  $("#promoModalTitle").textContent="Редактировать промокод";
+  $("#promoModal").classList.add("show");
+}
+
+function savePromo(){
+  const code=$("#promoCode").value.trim().toUpperCase();
+  const type=$("#promoType").value;
+  const value=parseInt($("#promoValue").value);
+  const min=parseInt($("#promoMin").value)||0;
+  const desc=$("#promoDesc").value.trim();
+  if(!code||!value){showToast("Код и значение обязательны","error");return;}
+
+  const editId=$("#promoEditId").value;
+  if(editId){
+    const p=promos.find(x=>x.id===parseInt(editId));
+    if(p){Object.assign(p,{code,type,value,min,desc});}
+  } else {
+    const maxId=promos.reduce((m,p)=>Math.max(m,p.id),0);
+    promos.push({id:maxId+1,code,type,value,min,desc,active:true,used:0});
+  }
+  saveAll();closeModal("promoModal");renderPromos();showToast("Промокод сохранён");
+}
+
+function togglePromo(id){
+  const p=promos.find(x=>x.id===id);
+  if(p){p.active=!p.active;saveAll();renderPromos();showToast("Промокод "+(p.active?"включён":"выключен"));}
+}
+
+function deletePromo(id){
+  if(!confirm("Удалить промокод?"))return;
+  promos=promos.filter(p=>p.id!==id);
+  saveAll();renderPromos();showToast("Промокод удалён");
+}
+
+/* ============================================================
+   КЛИЕНТЫ
+   ============================================================ */
+function renderCustomers(){
+  const search=($("#customerSearch").value||"").toLowerCase();
+  let list=[...customers].sort((a,b)=>b.spent-a.spent);
+  if(search) list=list.filter(c=>c.name.toLowerCase().includes(search)||c.phone.includes(search));
+
+  const rankIcon=r=>r>=3000?"👑":r>=1500?"🍳":r>=500?"🔥":"🏕️";
+  $("#customersTable").innerHTML=list.map(c=>`<tr>
+    <td data-label="Имя"><b>${c.name}</b></td><td data-label="Телефон">${c.phone}</td>
+    <td data-label="Заказов">${c.orders}</td><td data-label="Потрачено"><b>${fmt(c.spent)}</b></td>
+    <td data-label="Угольки">🔥 ${c.coal}</td>
+    <td data-label="Ранг">${rankIcon(c.xp)} ${c.xp} XP</td>
+    <td data-label="Последний визит">${fmtDate(c.lastVisit)}</td>
+  </tr>`).join("");
+}
+
+/* ============================================================
+   ГЕНЕРАЦИЯ ДЕМО-ДАННЫХ
+   ============================================================ */
+function generateDemoData(){
+  if(orders.length>0 && !confirm("Добавить новые данные к существующим?")) return;
+
+  const statuses=["new","cooking","ready","delivered","delivered","delivered"];
+
+  for(let i=0;i<30;i++){
+    const daysAgo=Math.floor(Math.random()*14);
+    const date=new Date(Date.now()-daysAgo*86400000-Math.random()*86400000);
+    const name=NAMES[Math.floor(Math.random()*NAMES.length)];
+    const phone=PHONES[Math.floor(Math.random()*PHONES.length)];
+    const addr=ADDRESSES[Math.floor(Math.random()*ADDRESSES.length)];
+
+    const itemCount=1+Math.floor(Math.random()*4);
+    const items=[];
+    let total=0;
+    for(let j=0;j<itemCount;j++){
+      const dish=dishes[Math.floor(Math.random()*dishes.length)];
+      const qty=1+Math.floor(Math.random()*3);
+      items.push({name:dish.name,price:dish.price,qty});
+      total+=dish.price*qty;
+    }
+
+    orders.push({
+      id:Date.now()%100000+i,
+      client:name,phone,address:addr,
+      items,total,status:statuses[Math.floor(Math.random()*statuses.length)],
+      type:Math.random()>.3?"delivery":"pickup",
+      date:date.toISOString()
+    });
+
+    // Клиенты
+    let cust=customers.find(c=>c.phone===phone);
+    if(!cust){
+      cust={name,phone,orders:0,spent:0,coal:0,xp:0,lastVisit:date.toISOString()};
+      customers.push(cust);
+    }
+    cust.orders++;
+    cust.spent+=total;
+    cust.coal+=Math.floor(total*0.05);
+    cust.xp+=Math.floor(total/10);
+    if(date.toISOString()>cust.lastVisit) cust.lastVisit=date.toISOString();
+  }
+
+  saveAll();
+  renderDashboard();
+  showToast("🎉 Сгенерировано 30 демо-заказов");
+}
+
+/* ============================================================
+   ЭКСПОРТ
+   ============================================================ */
+function exportCSV(){
+  let csv="ID,Клиент,Телефон,Сумма,Статус,Дата\n";
+  orders.forEach(o=>{
+    csv+=`#${o.id},"${o.client}","${o.phone}",${o.total},${o.status},"${o.date}"\n`;
+  });
+  download(csv,"orders.csv");
+}
+
+function exportCustomersCSV(){
+  let csv="Имя,Телефон,Заказов,Потрачено,Угольки,XP\n";
+  customers.forEach(c=>{
+    csv+=`"${c.name}","${c.phone}",${c.orders},${c.spent},${c.coal},${c.xp}\n`;
+  });
+  download(csv,"customers.csv");
+}
+
+function download(csv,filename){
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+  const link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download=filename;
+  link.click();
+}
+
+/* ============================================================
+   СЕГМЕНТЫ
+   ============================================================ */
+const BUILTIN_SEGMENTS = [
+  {id:"sleeping",icon:"😴",name:"Спящие",desc:"Не заказывали больше 30 дней",badge:"warning",badgeText:"Риск",
+   filter:c=>{const d=(Date.now()-new Date(c.lastVisit).getTime())/86400000;return d>=30;}},
+  {id:"one_timer",icon:"🎰",name:"Одноразовые",desc:"Заказали только 1 раз",badge:"danger",badgeText:"Уходят",
+   filter:c=>c.orders===1},
+  {id:"churned",icon:"💔",name:"Потерянные",desc:"Не заказывали 14–30 дней",badge:"warning",badgeText:"На грани",
+   filter:c=>{const d=(Date.now()-new Date(c.lastVisit).getTime())/86400000;return d>=14&&d<30;}},
+  {id:"newbies",icon:"🌟",name:"Новички",desc:"Первый заказ за последние 7 дней",badge:"info",badgeText:"Новые",
+   filter:c=>{const d=(Date.now()-new Date(c.lastVisit).getTime())/86400000;return d<=7&&c.orders===1;}},
+  {id:"regulars",icon:"🔥",name:"Постоянные",desc:"3 и более заказов",badge:"success",badgeText:"Лояльные",
+   filter:c=>c.orders>=3},
+  {id:"vip",icon:"👑",name:"VIP",desc:"Потратили больше 5000₽",badge:"purple",badgeText:"VIP",
+   filter:c=>c.spent>=5000},
+  {id:"big_spenders",icon:"💰",name:"Крупные чеки",desc:"Средний чек больше 1500₽",badge:"success",badgeText:"Топ",
+   filter:c=>c.orders>0&&(c.spent/c.orders)>=1500},
+  {id:"coal_rich",icon:"💎",name:"Богатые угольками",desc:"Больше 300 угольков",badge:"info",badgeText:"Копят",
+   filter:c=>c.coal>=300},
+  {id:"at_risk",icon:"⚠️",name:"Уходят",desc:"Были активны, но пропали на 7–14 дней",badge:"danger",badgeText:"Риск",
+   filter:c=>{const d=(Date.now()-new Date(c.lastVisit).getTime())/86400000;return d>=7&&d<14;}},
+];
+
+let customSegments = [];
+let currentSegment = null;
+
+function loadSegments(){
+  try{
+    const s=JSON.parse(localStorage.getItem("admin_custom_segments"));
+    customSegments=s&&s.length?s:[];
+  }catch(e){customSegments=[];}
+}
+
+function saveSegments(){
+  localStorage.setItem("admin_custom_segments",JSON.stringify(customSegments));
+}
+
+function getSegmentCustomers(seg){
+  const now=Date.now();
+  return customers.filter(c=>{
+    const daysSinceVisit=(now-new Date(c.lastVisit).getTime())/86400000;
+    const avgCheck=c.orders>0?c.spent/c.orders:0;
+    switch(seg){
+      case "sleeping": return daysSinceVisit>=30;
+      case "one_timer": return c.orders===1;
+      case "churned": return daysSinceVisit>=14&&daysSinceVisit<30;
+      case "newbies": return daysSinceVisit<=7&&c.orders===1;
+      case "regulars": return c.orders>=3;
+      case "vip": return c.spent>=5000;
+      case "big_spenders": return c.orders>0&&avgCheck>=1500;
+      case "coal_rich": return c.coal>=300;
+      case "at_risk": return daysSinceVisit>=7&&daysSinceVisit<14;
+      default: return false;
+    }
+  });
+}
+
+function getCustomSegmentCustomers(seg){
+  return customers.filter(c=>{
+    const daysSinceVisit=(Date.now()-new Date(c.lastVisit).getTime())/86400000;
+    const avgCheck=c.orders>0?c.spent/c.orders:0;
+    switch(seg.condition){
+      case "orders_more": return c.orders>=seg.value;
+      case "orders_less": return c.orders<=seg.value;
+      case "spent_more": return c.spent>=seg.value;
+      case "spent_less": return c.spent<=seg.value;
+      case "inactive_days": return daysSinceVisit>=seg.value;
+      case "active_days": return daysSinceVisit<=seg.value;
+      case "coal_more": return c.coal>=seg.value;
+      case "avg_check_more": return avgCheck>=seg.value;
+      default: return false;
+    }
+  });
+}
+
+function renderBuiltinSegments(){
+  $("#builtinSegments").innerHTML=BUILTIN_SEGMENTS.map(seg=>{
+    const list=getSegmentCustomers(seg.id);
+    return `<div class="segment-card" onclick="showSegmentDetail('${seg.id}','builtin')">
+      <span class="seg-badge ${seg.badge}">${seg.badgeText}</span>
+      <div class="seg-icon">${seg.icon}</div>
+      <div class="seg-name">${seg.name}</div>
+      <div class="seg-count">${list.length}</div>
+      <div class="seg-label">клиентов</div>
+      <div class="seg-desc">${seg.desc}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderCustomSegments(){
+  $("#customSegmentsTable").innerHTML=customSegments.length?customSegments.map(seg=>{
+    const list=getCustomSegmentCustomers(seg);
+    const condText={
+      orders_more:"Заказов ≥",orders_less:"Заказов ≤",
+      spent_more:"Потрачено ≥",spent_less:"Потрачено ≤",
+      inactive_days:"Не заходил дней ≥",active_days:"Заходил дней ≤",
+      coal_more:"Угольков ≥",avg_check_more:"Средний чек ≥"
+    };
+    return `<tr>
+      <td data-label="Название"><b>${seg.name}</b></td>
+      <td data-label="Условие">${condText[seg.condition]} ${seg.value}</td>
+      <td data-label="Клиентов"><b>${list.length}</b></td>
+      <td data-label="Действия">
+        <button class="btn btn-sm btn-outline" onclick="showSegmentDetail(${seg.id},'custom')"><i class="fas fa-eye"></i></button>
+        <button class="btn btn-sm btn-danger" onclick="deleteSegment(${seg.id})" style="margin-left:4px;"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>`;
+  }).join(""):`<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:30px;">Пока нет пользовательских сегментов</td></tr>`;
+}
+
+function renderSegments(){
+  renderBuiltinSegments();
+  renderCustomSegments();
+}
+
+function showSegmentDetail(id,type){
+  let list,title;
+  if(type==="builtin"){
+    const seg=BUILTIN_SEGMENTS.find(s=>s.id===id);
+    list=getSegmentCustomers(id);
+    title=seg.icon+" "+seg.name+" ("+list.length+")";
+  } else {
+    const seg=customSegments.find(s=>s.id===id);
+    list=getCustomSegmentCustomers(seg);
+    title="📋 "+seg.name+" ("+list.length+")";
+  }
+  currentSegment={id,type,list};
+  $("#segmentDetailTitle").textContent=title;
+  $("#segmentDetailTable").innerHTML=list.map(c=>`<tr>
+    <td data-label="Имя"><b>${c.name}</b></td><td data-label="Телефон">${c.phone}</td>
+    <td data-label="Заказов">${c.orders}</td><td data-label="Потрачено"><b>${fmt(c.spent)}</b></td>
+    <td data-label="Последний визит">${fmtDate(c.lastVisit)}</td>
+  </tr>`).join("")||`<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:30px;">Нет клиентов в этом сегменте</td></tr>`;
+  $("#segmentDetail").style.display="block";
+  $("#segmentDetail").scrollIntoView({behavior:"smooth"});
+}
+
+function closeSegmentDetail(){
+  $("#segmentDetail").style.display="none";
+  currentSegment=null;
+}
+
+function showSegmentModal(){
+  $("#segmentModal").classList.add("show");
+}
+
+function saveSegment(){
+  const name=$("#segName").value.trim();
+  const condition=$("#segCondition").value;
+  const value=parseInt($("#segValue").value);
+  if(!name||!value){showToast("Заполните все поля","error");return;}
+  const maxId=customSegments.reduce((m,s)=>Math.max(m,s.id),0);
+  customSegments.push({id:maxId+1,name,condition,value});
+  saveSegments();closeModal("segmentModal");renderSegments();
+  showToast("Сегмент создан");
+}
+
+function deleteSegment(id){
+  if(!confirm("Удалить сегмент?"))return;
+  customSegments=customSegments.filter(s=>s.id!==id);
+  saveSegments();renderSegments();showToast("Сегмент удалён");
+}
+
+function exportSegmentCSV(){
+  if(!currentSegment)return;
+  let csv="Имя,Телефон,Заказов,Потрачено,Последний визит\n";
+  currentSegment.list.forEach(c=>{
+    csv+=`"${c.name}","${c.phone}",${c.orders},${c.spent},"${c.lastVisit}"\n`;
+  });
+  download(csv,"segment_"+currentSegment.id+".csv");
+}
+
+/* ============================================================
+   РАССЫЛКИ / СООБЩЕНИЯ
+   ============================================================ */
+const MSG_TEMPLATES = {
+  promo: {
+    text: "🔥 {name}, у нас для тебя скидка {discount}% по промокоду {promo}! Забирай бонус в приложении. Акция до {date}.",
+    subject: "Скидка专为你"
+  },
+  winback: {
+    text: "💔 {name}, мы скучаем по тебе! Возвращайся — получай бонус +100🔥 за следующий заказ. Промокод: COMEBACK100. Ждём тебя!",
+    subject: "Мы скучаем"
+  },
+  thankyou: {
+    text: "🙏 {name}, спасибо что выбираешь «Все Про Жар»! Твой заказ #{order} очень порадовал нас. Приходи ещё — sempre ждём! 🔥",
+    subject: "Спасибо!"
+  },
+  birthday: {
+    text: "🎂 {name}, с днём рождения! Дарим тебе скидку 20% на весь заказ по промокоду BIRTHDAY20. Забирай подарок в приложении!",
+    subject: "С Днём Рождения!"
+  },
+  newdish: {
+    text: "🆕 {name}, в меню «Все Про Жар» добавили новинку! Попробуй первый — {dish}. Только до {date}. Закажи в приложении 🔥",
+    subject: "Новинка в меню"
+  },
+  coal: {
+    text: "🔥 {name}, у тебя накопилось {coal} угольков! Не теряй — потрати их на бесплатные соусы, напитки или скидки. Зайди в приложение!",
+    subject: "Твои угольки"
+  }
+};
+
+let messageLog = [];
+
+function loadMessages(){
+  try{
+    const m=JSON.parse(localStorage.getItem("admin_messages"));
+    messageLog=m&&m.length?m:[];
+  }catch(e){messageLog=[];}
+}
+
+function saveMessages(){
+  localStorage.setItem("admin_messages",JSON.stringify(messageLog));
+}
+
+function applyTemplate(key){
+  const tpl=MSG_TEMPLATES[key];
+  if(!tpl)return;
+
+  $$(".msg-tpl").forEach(t=>t.classList.remove("active"));
+  $$(".msg-tpl[data-tpl='"+key+"']")[0]?.classList.add("active");
+
+  let text=tpl.text;
+  const today=new Date();
+  const dateStr=String(today.getDate()).padStart(2,"0")+"."+
+    String(today.getMonth()+1).padStart(2,"0")+"."+
+    String(today.getFullYear());
+
+  // Заполняем шаблонные переменные из первого клиента (для превью)
+  if(currentSegment && currentSegment.list.length>0){
+    const c=currentSegment.list[0];
+    const dishNames=["Шашлык из свинины","Крылья BBQ","Хачапури","Чизкейк «Уголёк»"];
+    const dish=dishNames[Math.floor(Math.random()*dishNames.length)];
+    text=text.replace("{name}",c.name)
+      .replace("{discount}",["10","15","20"][Math.floor(Math.random()*3)])
+      .replace("{promo}",promos.length?promos[0].code:"GRILL20")
+      .replace("{date}",dateStr)
+      .replace("{order}","#"+(1000+Math.floor(Math.random()*9000)))
+      .replace("{dish}",dish)
+      .replace("{coal}",c.coal);
+  } else {
+    text=text.replace("{name}","Клиент")
+      .replace("{discount}","15")
+      .replace("{promo}","SPARK10")
+      .replace("{date}",dateStr)
+      .replace("{order}","#1234")
+      .replace("{dish}","Шашлык из баранины")
+      .replace("{coal}","350");
+  }
+
+  $("#messageText").value=text;
+  updateMessagePreview();
+}
+
+function openMessageModal(){
+  if(!currentSegment||!currentSegment.list.length){
+    showToast("Сначала выберите сегмент","error");return;
+  }
+  $("#messageRecipients").textContent=currentSegment.list.length;
+
+  // Заполняем список промокодов
+  const sel=$("#msgPromoSelect");
+  sel.innerHTML="<option value=''>Без промокода</option>"+
+    promos.filter(p=>p.active).map(p=>`<option value="${p.code}">${p.code} — ${p.desc}</option>`).join("");
+
+  $("#messageText").value="";
+  $$(".msg-tpl").forEach(t=>t.classList.remove("active"));
+  $("#msgPreviewBox").style.display="none";
+  $("#msgAttachPromo").checked=false;
+  sel.disabled=true;
+
+  $("#messageModal").classList.add("show");
+}
+
+function updateMessagePreview(){
+  const hasPromo=$("#msgAttachPromo").checked;
+  const sel=$("#msgPromoSelect");
+  sel.disabled=!hasPromo;
+}
+
+function previewMessage(){
+  const text=$("#messageText").value.trim();
+  if(!text){showToast("Введите текст сообщения","error");return;}
+
+  const channel=$("#messageChannel").value;
+  const hasPromo=$("#msgAttachPromo").checked;
+  const promoCode=$("#msgPromoSelect").value;
+
+  let preview=`📱 Канал: Push\n`;
+  preview+=`👥 Получателей: ${currentSegment?currentSegment.list.length:0}\n\n`;
+  preview+=text;
+  if(hasPromo && promoCode){
+    const p=promos.find(x=>x.code===promoCode);
+    if(p) preview+=`\n\n🎫 Промокод: ${p.code} (${p.desc})`;
+  }
+
+  $("#msgPreviewContent").textContent=preview;
+  $("#msgPreviewBox").style.display="block";
+}
+
+function sendMessage(){
+  const text=$("#messageText").value.trim();
+  if(!text){showToast("Введите текст сообщения","error");return;}
+  if(!currentSegment||!currentSegment.list.length){showToast("Нет получателей","error");return;}
+
+  const delay=parseInt($("#messageDelay").value);
+  const hasPromo=$("#msgAttachPromo").checked;
+  const promoCode=hasPromo?$("#msgPromoSelect").value:"";
+
+  const msgId=Date.now()%1000000;
+  const recipients=currentSegment.list.map(c=>({
+    name:c.name,phone:c.phone,
+    status:Math.random()>.15?"delivered":(Math.random()>.5?"sent":"failed")
+  }));
+
+  const entry={
+    id:msgId,
+    segmentName:currentSegment.type==="builtin"
+      ?BUILTIN_SEGMENTS.find(s=>s.id===currentSegment.id)?.name||currentSegment.id
+      :(customSegments.find(s=>s.id===currentSegment.id)?.name||"Мой сегмент"),
+    channel:"Push",
+    channelKey:"push",
+    text,promoCode:promoCode||null,
+    recipientsCount:recipients.length,
+    deliveredCount:recipients.filter(r=>r.status==="delivered").length,
+    readCount:Math.floor(recipients.length*.3),
+    status:"sent",
+    date:new Date().toISOString(),
+    recipients
+  };
+
+  messageLog.unshift(entry);
+  saveMessages();
+
+  closeModal("messageModal");
+  showToast(`📨 Рассылка отправлена ${recipients.length} клиентам!`);
+
+  if(delay>0){
+    setTimeout(()=>{
+      entry.status="delivered";
+      entry.deliveredCount=recipients.length;
+      saveMessages();
+      showToast(`✅ Доставлено ${recipients.length} получателям`);
+    },delay*1000);
+  }
+}
+
+function renderMessages(){
+  const filter=$("#msgFilter").value;
+  const search=($("#msgSearch").value||"").toLowerCase();
+  let list=[...messageLog];
+  if(filter!=="all") list=list.filter(m=>m.status===filter);
+  if(search) list=list.filter(m=>m.text.toLowerCase().includes(search)||m.segmentName.toLowerCase().includes(search));
+
+  const statusBadge={sent:"status-new",delivered:"status-ready",read:"status-cooking",failed:"status-cancelled"};
+  const statusTxt={sent:"Отправлено",delivered:"Доставлено",read:"Прочитано",failed:"Ошибка"};
+
+  $("#messagesTable").innerHTML=list.length?list.map(m=>`<tr>
+    <td data-label="ID">#${m.id}</td>
+    <td data-label="Сегмент"><b>${m.segmentName}</b></td>
+    <td data-label="Канал">${m.channel}</td>
+    <td data-label="Текст" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;">${m.text.slice(0,60)}...</td>
+    <td data-label="Получателей">${m.recipientsCount}</td>
+    <td data-label="Статус"><span class="status-badge ${statusBadge[m.status]}">${statusTxt[m.status]}</span></td>
+    <td data-label="Дата">${fmtDate(m.date)}</td>
+    <td data-label="Действия"><button class="btn btn-sm btn-outline" onclick="showMsgDetail(${m.id})"><i class="fas fa-eye"></i></button></td>
+  </tr>`).join(""):`<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px;">Пока нет отправленных рассылок</td></tr>`;
+}
+
+function showMsgDetail(id){
+  const m=messageLog.find(x=>x.id===id);
+  if(!m)return;
+
+  $("#msgDetailTitle").textContent=`Рассылка #${m.id} — ${m.segmentName}`;
+  let detail=m.text;
+  if(m.promoCode) detail+=`\n\n🎫 Промокод: ${m.promoCode}`;
+  detail+=`\n\n📡 Канал: ${m.channel}`;
+  detail+=`\n📅 Дата: ${fmtDate(m.date)}`;
+  detail+=`\n👥 Получателей: ${m.recipientsCount}`;
+  detail+=` | ✅ Доставлено: ${m.deliveredCount}`;
+  detail+=` | 👀 Прочитано: ${m.readCount}`;
+  detail+=` | ❌ Ошибки: ${m.recipientsCount-m.deliveredCount}`;
+  $("#msgDetailContent").textContent=detail;
+
+  const statusBadge={sent:"status-new",delivered:"status-ready",failed:"status-cancelled"};
+  const statusTxt={sent:"Отправлено",delivered:"Доставлено",failed:"Ошибка"};
+  $("#msgDetailRecipients").innerHTML=m.recipients.map(r=>`<tr>
+    <td data-label="Имя">${r.name}</td><td data-label="Телефон">${r.phone}</td>
+    <td data-label="Статус"><span class="status-badge ${statusBadge[r.status]}">${statusTxt[r.status]}</span></td>
+  </tr>`).join("");
+
+  $("#msgDetail").style.display="block";
+  $("#msgDetail").scrollIntoView({behavior:"smooth"});
+}
+
+function exportMessagesCSV(){
+  let csv="ID,Сегмент,Канал,Текст,Получателей,Статус,Дата\n";
+  messageLog.forEach(m=>{
+    csv+=`#${m.id},"${m.segmentName}","${m.channel}","${m.text.replace(/"/g,'""').slice(0,100)}",${m.recipientsCount},${m.status},"${m.date}"\n`;
+  });
+  download(csv,"messages.csv");
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function init(){
+  loadData();
+  loadSegments();
+  loadMessages();
+  renderDashboard();
+  renderOrders();
+  renderMenuTable();
+  renderPromos();
+  renderCustomers();
+  renderSegments();
+  renderMessages();
+}
+
+// Проверяем залогинен ли
+if(localStorage.getItem("admin_logged")==="1"){
+  $("#loginOverlay").classList.add("hidden");
+  init();
+}
+
+/* Resize handler для графиков */
+let _resizeTimer;
+window.addEventListener("resize",()=>{
+  clearTimeout(_resizeTimer);
+  _resizeTimer=setTimeout(()=>{
+    if($("#page-dashboard")&&$("#page-dashboard").classList.contains("active")){
+      drawRevenueChart();
+      drawTopDishesChart();
+      drawCategoryChart();
+    }
+  },250);
+});
+</script>
+</body>
+</html>
