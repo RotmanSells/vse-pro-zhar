@@ -684,6 +684,136 @@ body{
   cursor:pointer;box-shadow:var(--shadow-fire);
 }
 
+/* ============================================================
+   МОДАЛКА ОФОРМЛЕНИЯ ЗАКАЗА (доставка / самовывоз)
+   ============================================================ */
+.checkout-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  backdrop-filter:blur(4px);
+  display:flex;align-items:flex-end;justify-content:center;
+  z-index:100;opacity:0;pointer-events:none;
+  transition:opacity .3s;
+}
+.checkout-overlay.show{opacity:1;pointer-events:auto;}
+.checkout-sheet{
+  background:linear-gradient(160deg,#fff,#fff8f0);
+  border-radius:24px 24px 0 0;padding:0;
+  max-width:480px;width:100%;
+  max-height:92vh;overflow-y:auto;
+  transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+  -webkit-overflow-scrolling:touch;
+}
+.checkout-overlay.show .checkout-sheet{transform:translateY(0);}
+.checkout-sheet::-webkit-scrollbar{width:0;}
+.checkout-header{
+  position:sticky;top:0;z-index:2;
+  background:linear-gradient(160deg,#fff,#fff8f0);
+  padding:20px 20px 0;border-radius:24px 24px 0 0;
+}
+.checkout-header h2{
+  font-family:'Montserrat';font-weight:900;font-size:20px;
+  background:linear-gradient(90deg,var(--primary),var(--accent));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.checkout-header .close-btn{
+  position:absolute;top:16px;right:16px;
+  width:36px;height:36px;border-radius:50%;border:none;
+  background:rgba(0,0,0,.06);font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.checkout-body{padding:16px 20px 24px;}
+
+/* Табы Доставка / Самовывоз */
+.delivery-tabs{
+  display:flex;gap:8px;margin-bottom:18px;
+}
+.delivery-tab{
+  flex:1;padding:12px 8px;border-radius:14px;border:2px solid #e8e2da;
+  background:#fff;cursor:pointer;text-align:center;
+  transition:all .2s;
+}
+.delivery-tab .dt-icon{font-size:22px;margin-bottom:4px;}
+.delivery-tab .dt-label{font-size:13px;font-weight:700;color:var(--muted);}
+.delivery-tab .dt-price{font-size:11px;color:var(--muted);margin-top:2px;}
+.delivery-tab.active{
+  border-color:var(--primary);background:rgba(255,149,0,.06);
+}
+.delivery-tab.active .dt-label{color:var(--primary);}
+
+/* Секции формы */
+.co-form-section{margin-bottom:18px;}
+.co-form-section h4{
+  font-size:13px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;
+}
+.co-input{
+  width:100%;padding:13px 14px;border-radius:12px;
+  border:2px solid #e8e2da;background:#fff;
+  font-size:15px;font-family:inherit;color:var(--text);
+  outline:none;transition:border .2s;
+}
+.co-input:focus{border-color:var(--primary);}
+.co-input::placeholder{color:#b5ada4;}
+.co-row{display:flex;gap:10px;margin-bottom:10px;}
+.co-row .co-input{flex:1;}
+.co-input.short{max-width:90px;}
+
+/* Выбор времени */
+.time-options{display:flex;gap:8px;flex-wrap:wrap;}
+.time-opt{
+  padding:10px 16px;border-radius:12px;border:2px solid #e8e2da;
+  background:#fff;cursor:pointer;font-size:13px;font-weight:600;
+  color:var(--muted);transition:all .2s;flex:1;min-width:100px;text-align:center;
+}
+.time-opt.active{border-color:var(--primary);color:var(--primary);background:rgba(255,149,0,.06);}
+
+/* Точки самовывоза */
+.pickup-points{display:flex;flex-direction:column;gap:8px;}
+.pickup-point{
+  padding:14px;border-radius:14px;border:2px solid #e8e2da;
+  background:#fff;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;gap:12px;
+}
+.pickup-point.active{border-color:var(--primary);background:rgba(255,149,0,.06);}
+.pickup-point .pp-icon{font-size:24px;flex-shrink:0;}
+.pickup-point .pp-info{flex:1;}
+.pickup-point .pp-name{font-weight:700;font-size:14px;}
+.pickup-point .pp-addr{font-size:12px;color:var(--muted);margin-top:2px;}
+.pickup-point .pp-time{font-size:11px;color:var(--primary);font-weight:600;margin-top:2px;}
+.pickup-point .pp-check{
+  width:22px;height:22px;border-radius:50%;border:2px solid #d5cfc7;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all .2s;
+}
+.pickup-point.active .pp-check{
+  border-color:var(--primary);background:var(--primary);color:#fff;
+}
+
+/* Итого в модалке */
+.co-summary{
+  background:rgba(255,149,0,.06);border-radius:16px;
+  padding:14px;margin-top:18px;
+}
+.co-summary .sr{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;}
+.co-summary .sr.total{border-top:2px solid #e8e2da;margin-top:6px;padding-top:10px;font-weight:800;font-size:16px;font-family:'Montserrat';}
+
+/* Кнопка подтверждения */
+.co-submit{
+  width:100%;padding:16px;border:none;border-radius:16px;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  color:#fff;font-family:'Montserrat';font-weight:700;font-size:16px;
+  cursor:pointer;box-shadow:var(--shadow-fire);margin-top:16px;
+  transition:transform .15s,opacity .15s;
+}
+.co-submit:active{transform:scale(.97);}
+.co-submit:disabled{opacity:.5;cursor:default;transform:none;}
+
+/* Адаптив модалки на мобильных */
+@media(max-width:519px){
+  .checkout-sheet{border-radius:20px 20px 0 0;max-height:95vh;}
+  .checkout-body{padding:14px 16px 20px;}
+}
+
 /* Конфетти */
 .confetti-piece{
   position:fixed;width:10px;height:14px;top:-20px;
@@ -915,6 +1045,16 @@ body{
   .promo-input{margin:14px 0;}
   .cart-summary{padding:12px;}
   .checkout-btn{padding:14px;font-size:14px;}
+  .delivery-tab{padding:10px 6px;}
+  .delivery-tab .dt-icon{font-size:18px;}
+  .delivery-tab .dt-label{font-size:12px;}
+  .time-opt{padding:8px 12px;font-size:12px;}
+  .pickup-point{padding:12px;gap:10px;}
+  .pickup-point .pp-icon{font-size:20px;}
+  .pickup-point .pp-name{font-size:13px;}
+  .co-input{padding:11px 12px;font-size:14px;}
+  .co-row{gap:8px;}
+  .co-row .co-input.short{max-width:80px;font-size:13px;padding:10px 8px;}
   .profile-head{padding:18px 14px;}
   .avatar{width:64px;height:64px;font-size:30px;}
   .profile-name{font-size:16px;}
@@ -1083,10 +1223,10 @@ body{
         </div>
 
         <div class="stats-grid">
-          <div class="stat-card"><div class="val">12</div><div class="lbl">Заказов сделано</div></div>
-          <div class="stat-card"><div class="val">3</div><div class="lbl">До след. награды</div></div>
+          <div class="stat-card"><div class="val" id="profileOrderCount">0</div><div class="lbl">Заказов сделано</div></div>
+          <div class="stat-card"><div class="val" id="profileToNext">3</div><div class="lbl">До след. награды</div></div>
           <div class="stat-card" style="grid-column:span 2;">
-            <div class="val" style="font-size:15px;line-height:1.3;">🥩 Шашлык из свинины</div>
+            <div class="val" style="font-size:15px;line-height:1.3;" id="profileFav">—</div>
             <div class="lbl">Любимое блюдо</div>
           </div>
         </div>
@@ -1157,27 +1297,7 @@ body{
 
         <div class="settings-card" style="padding:6px 0;">
           <h4 style="padding:14px 16px 8px;">📜 История заказов</h4>
-          <div class="history-item">
-            <div>
-              <div class="h-name">Шашлык из свинины ×2</div>
-              <div class="h-meta">2 июля 2026 · Выполнен</div>
-            </div>
-            <div class="h-sum">900₽</div>
-          </div>
-          <div class="history-item">
-            <div>
-              <div class="h-name">Комбо «Гриль-мастер»</div>
-              <div class="h-meta">28 июня 2026 · Выполнен</div>
-            </div>
-            <div class="h-sum">1290₽</div>
-          </div>
-          <div class="history-item">
-            <div>
-              <div class="h-name">Крылья BBQ + Лимонад</div>
-              <div class="h-meta">20 июня 2026 · Выполнен</div>
-            </div>
-            <div class="h-sum">580₽</div>
-          </div>
+          <div id="historyContainer"></div>
         </div>
 
         <button class="logout-btn" onclick="showToast('👋 Демо-режим: выход недоступен','warn')">Выйти из аккаунта</button>
@@ -1213,6 +1333,17 @@ body{
       <i class="fas fa-user"></i><span>Профиль</span>
     </button>
   </nav>
+
+<!-- ============ МОДАЛКА ОФОРМЛЕНИЯ ЗАКАЗА ============ -->
+<div class="checkout-overlay" id="checkoutOverlay">
+  <div class="checkout-sheet" id="checkoutSheet">
+    <div class="checkout-header">
+      <h2>Оформление заказа</h2>
+      <button class="close-btn" onclick="closeCheckout()">✕</button>
+    </div>
+    <div class="checkout-body" id="checkoutBody"></div>
+  </div>
+</div>
 
 <!-- ============ МОДАЛКА ВЫИГРЫША ============ -->
 <div class="modal-overlay" id="winModal">
@@ -1277,6 +1408,18 @@ const PRIZES = [
   {emoji:"🎲", title:"Попробуйте ещё раз!",    text:"Не повезло в этот раз — в следующий раз точно!",     color:"#5a544c"},
 ];
 
+// Точки самовывоза
+const PICKUP_POINTS = [
+  {id:1, name:"Все Про Жар — Центр",    addr:"ул. Пушкина, 10",       time:"20–30 мин", icon:"🔥"},
+  {id:2, name:"Все Про Жар — Север",    addr:"пр. Мира, 45",          time:"25–35 мин", icon:"🔥"},
+  {id:3, name:"Все Про Жар — Юг",       addr:"ул. Ленина, 78",        time:"30–40 мин", icon:"🔥"},
+  {id:4, name:"Все Про Жар — Запад",    addr:"ул. Гагарина, 22",      time:"15–25 мин", icon:"🔥"},
+];
+
+// Стоимость доставки
+const DELIVERY_FREE_THRESHOLD = 2000; // бесплатно от суммы
+const DELIVERY_COST = 299;
+
 // Квесты (прогресс вычисляется/хранится в state)
 const QUESTS = [
   {id:"meat", icon:"🥩", title:"Мясной Босс",   desc:"Попробуйте 5 видов мяса",         goal:5,  progress:3, unit:"вида"},
@@ -1313,6 +1456,18 @@ function defaultState(){
     wonPrizes: [],
     questsProgress:{meat:3,first:0,money:0,sauce:0},
     orderHistory: [],
+    deliveryType: "delivery",
+    deliveryAddress: "",
+    deliveryBuilding: "",
+    deliveryApartment: "",
+    deliveryEntrance: "",
+    deliveryFloor: "",
+    deliveryIntercom: "",
+    deliveryComment: "",
+    pickupPointId: 1,
+    deliveryTime: "asap",
+    contactName: "",
+    contactPhone: "",
   };
 }
 function loadState(){
@@ -1375,7 +1530,7 @@ function showScreen(name){
   if(name==="cart") renderCart();
   if(name==="roulette") updateRoulette();
   if(name==="passport") renderPassport();
-  if(name==="profile") $("#profileCoal").textContent = state.coal;
+  if(name==="profile"){ renderProfile(); }
 }
 
 /* ============================================================
@@ -1454,11 +1609,15 @@ function removeFromCart(id){
 function updateCounters(){
   const count = cartCount();
   const sum = cartTotal();
+  const rawSum = state.cart.reduce((s,it)=>{const d=DISHES.find(x=>x.id===it.id);return s+(d?d.price*it.qty:0);},0);
+  const isDelivery = state.deliveryType==="delivery";
+  const deliveryCost = isDelivery ? (rawSum >= DELIVERY_FREE_THRESHOLD ? 0 : DELIVERY_COST) : 0;
+  const total = rawSum + deliveryCost;
   const badge = $("#cartBadge");
   if(count>0){ badge.style.display="flex"; badge.textContent = count; }
   else badge.style.display="none";
   $("#floatingCartCount").textContent = count;
-  $("#floatingCartSum").textContent = formatPrice(sum);
+  $("#floatingCartSum").textContent = formatPrice(total);
   if(count>0) $("#floatingCart").classList.add("show");
   else $("#floatingCart").classList.remove("show");
   $("#coalCount").textContent = state.coal;
@@ -1509,6 +1668,9 @@ function renderCart(){
   const toRoulette = Math.max(0, 1500 - sum);
   const rawSum = state.cart.reduce((s,it)=>{const d=DISHES.find(x=>x.id===it.id);return s+(d?d.price*it.qty:0);},0);
   const discount = rawSum - sum;
+  const isDelivery = state.deliveryType==="delivery";
+  const deliveryCost = isDelivery ? (rawSum >= DELIVERY_FREE_THRESHOLD ? 0 : DELIVERY_COST) : 0;
+  const total = rawSum + deliveryCost;
 
   c.innerHTML = `
     <div class="cart-list">${items}</div>
@@ -1518,14 +1680,27 @@ function renderCart(){
       <button onclick="applyPromo()">ОК</button>
     </div>
 
+    <!-- Тип: доставка / самовывоз -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <div onclick="setDeliveryType('delivery')" style="flex:1;padding:12px 8px;border-radius:14px;border:2px solid ${isDelivery?'var(--primary)':'#e8e2da'};background:${isDelivery?'rgba(255,149,0,.06)':'#fff'};cursor:pointer;text-align:center;transition:all .2s;">
+        <div style="font-size:20px;">🚗</div>
+        <div style="font-size:12px;font-weight:700;color:${isDelivery?'var(--primary)':'var(--muted)'};">Доставка</div>
+      </div>
+      <div onclick="setDeliveryType('pickup')" style="flex:1;padding:12px 8px;border-radius:14px;border:2px solid ${!isDelivery?'var(--primary)':'#e8e2da'};background:${!isDelivery?'rgba(255,149,0,.06)':'#fff'};cursor:pointer;text-align:center;transition:all .2s;">
+        <div style="font-size:20px;">🚶</div>
+        <div style="font-size:12px;font-weight:700;color:${!isDelivery?'var(--primary)':'var(--muted)'};">Самовывоз</div>
+      </div>
+    </div>
+
     <div class="cart-summary">
       <div class="summary-row"><span>Сумма заказа</span><span>${formatPrice(rawSum)}</span></div>
       ${discount>0?`<div class="summary-row"><span>Скидка (${state.activePromo})</span><span style="color:#3fbf38;">-${formatPrice(discount)}</span></div>`:''}
-      <div class="summary-row"><span>Доставка</span><span style="color:#3fbf38;">Бесплатно</span></div>
+      <div class="summary-row"><span>Доставка</span><span style="color:${deliveryCost===0?'#3fbf38':'var(--text)'};">${isDelivery?(deliveryCost===0?'Бесплатно':formatPrice(DELIVERY_COST)):'Бесплатно (самовывоз)'}</span></div>
+      ${isDelivery && rawSum<DELIVERY_FREE_THRESHOLD?`<div style="text-align:right;font-size:11px;color:var(--muted);margin-top:-4px;margin-bottom:4px;">Бесплатно от ${formatPrice(DELIVERY_FREE_THRESHOLD)}, осталось ${formatPrice(DELIVERY_FREE_THRESHOLD-rawSum)}</div>`:''}
       <div class="summary-row"><span>Кэшбэк Угольками (5%)</span><span style="color:var(--primary);font-weight:700;">+${coalEarn} 🔥</span></div>
       <div class="summary-row total">
         <span>Итого</span>
-        <span style="text-align:right;">${formatPrice(sum)}<div class="coal-earn">вернётся +${coalEarn} 🔥</div></span>
+        <span style="text-align:right;">${formatPrice(total)}<div class="coal-earn">вернётся +${coalEarn} 🔥</div></span>
       </div>
     </div>
 
@@ -1537,7 +1712,7 @@ function renderCart(){
            🎡 Рулетка доступна! Крутите и выигрывайте!
          </div>` }
 
-    <button class="checkout-btn" onclick="checkout()">🔥 ОФОРМИТЬ ЗАКАЗ</button>
+    <button class="checkout-btn" onclick="openCheckout()">🔥 ОФОРМИТЬ ЗАКАЗ</button>
   `;
 }
 
@@ -1562,31 +1737,182 @@ function applyPromo(){
   }
 }
 
-// Оформление заказа
-function checkout(){
-  const sum = cartTotal();
-  if(sum===0) return;
-  const coalEarn = Math.floor(sum*0.05);
+// Оформление заказа — открыть модалку
+function openCheckout(){
+  if(state.cart.length===0){showToast("Корзина пуста","warn");return;}
+  renderCheckoutForm();
+  $("#checkoutOverlay").classList.add("show");
+  document.body.style.overflow="hidden";
+}
+function closeCheckout(){
+  $("#checkoutOverlay").classList.remove("show");
+  document.body.style.overflow="";
+}
+
+// Рендер формы оформления
+function renderCheckoutForm(){
+  const rawSum = state.cart.reduce((s,it)=>{const d=DISHES.find(x=>x.id===it.id);return s+(d?d.price*it.qty:0);},0);
+  const isDelivery = state.deliveryType==="delivery";
+  const deliveryCost = isDelivery ? (rawSum >= DELIVERY_FREE_THRESHOLD ? 0 : DELIVERY_COST) : 0;
+  const total = rawSum + deliveryCost;
+
+  const timeSlots = [
+    {val:"asap", label:"Как можно скорее"},
+    {val:"12:00-13:00", label:"12:00 – 13:00"},
+    {val:"13:00-14:00", label:"13:00 – 14:00"},
+    {val:"14:00-15:00", label:"14:00 – 15:00"},
+    {val:"15:00-16:00", label:"15:00 – 16:00"},
+    {val:"16:00-17:00", label:"16:00 – 17:00"},
+    {val:"17:00-18:00", label:"17:00 – 18:00"},
+    {val:"18:00-19:00", label:"18:00 – 19:00"},
+    {val:"19:00-20:00", label:"19:00 – 20:00"},
+  ];
+
+  const html = `
+    <!-- Табы -->
+    <div class="delivery-tabs">
+      <div class="delivery-tab ${isDelivery?'active':''}" onclick="setDeliveryType('delivery')">
+        <div class="dt-icon">🚗</div>
+        <div class="dt-label">Доставка</div>
+        <div class="dt-price">${rawSum>=DELIVERY_FREE_THRESHOLD?'Бесплатно':formatPrice(DELIVERY_COST)}</div>
+      </div>
+      <div class="delivery-tab ${!isDelivery?'active':''}" onclick="setDeliveryType('pickup')">
+        <div class="dt-icon">🚶</div>
+        <div class="dt-label">Самовывоз</div>
+        <div class="dt-price">Бесплатно</div>
+      </div>
+    </div>
+
+    ${isDelivery ? `
+      <!-- Адрес доставки -->
+      <div class="co-form-section">
+        <h4>Адрес доставки</h4>
+        <input class="co-input" placeholder="Улица, дом" id="coAddr" value="${escHtml(state.deliveryAddress)}" oninput="state.deliveryAddress=this.value">
+        <div class="co-row" style="margin-top:10px;">
+          <input class="co-input short" placeholder="Корпус" id="coBld" value="${escHtml(state.deliveryBuilding)}" oninput="state.deliveryBuilding=this.value">
+          <input class="co-input short" placeholder="Кв." id="coApt" value="${escHtml(state.deliveryApartment)}" oninput="state.deliveryApartment=this.value">
+        </div>
+        <div class="co-row">
+          <input class="co-input short" placeholder="Подъезд" id="coEnt" value="${escHtml(state.deliveryEntrance)}" oninput="state.deliveryEntrance=this.value">
+          <input class="co-input short" placeholder="Этаж" id="coFlr" value="${escHtml(state.deliveryFloor)}" oninput="state.deliveryFloor=this.value">
+          <input class="co-input short" placeholder="Домофон" id="coInt" value="${escHtml(state.deliveryIntercom)}" oninput="state.deliveryIntercom=this.value">
+        </div>
+      </div>
+    ` : `
+      <!-- Точки самовывоза -->
+      <div class="co-form-section">
+        <h4>Выберите точку</h4>
+        <div class="pickup-points">
+          ${PICKUP_POINTS.map(p=>`
+            <div class="pickup-point ${state.pickupPointId===p.id?'active':''}" onclick="selectPickup(${p.id})">
+              <div class="pp-icon">${p.icon}</div>
+              <div class="pp-info">
+                <div class="pp-name">${p.name}</div>
+                <div class="pp-addr">${p.addr}</div>
+                <div class="pp-time">⏱ ${p.time}</div>
+              </div>
+              <div class="pp-check">${state.pickupPointId===p.id?'✓':''}</div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `}
+
+    <!-- Время -->
+    <div class="co-form-section">
+      <h4>Время ${isDelivery?'доставки':'самовывоза'}</h4>
+      <div class="time-options">
+        ${timeSlots.map(t=>`
+          <div class="time-opt ${state.deliveryTime===t.val?'active':''}" onclick="selectTime('${t.val}')">
+            ${t.label}
+          </div>
+        `).join("")}
+      </div>
+    </div>
+
+    <!-- Контакты -->
+    <div class="co-form-section">
+      <h4>Контакты</h4>
+      <input class="co-input" placeholder="Ваше имя" id="coName" value="${escHtml(state.contactName)}" oninput="state.contactName=this.value" style="margin-bottom:10px;">
+      <input class="co-input" placeholder="Телефон" id="coPhone" type="tel" value="${escHtml(state.contactPhone)}" oninput="state.contactPhone=this.value">
+    </div>
+
+    <!-- Комментарий -->
+    <div class="co-form-section">
+      <h4>Комментарий к заказу</h4>
+      <input class="co-input" placeholder="Пожелания, номер дома и т.д." id="coComment" value="${escHtml(state.deliveryComment)}" oninput="state.deliveryComment=this.value">
+    </div>
+
+    <!-- Итого -->
+    <div class="co-summary">
+      <div class="sr"><span>Сумма заказа</span><span>${formatPrice(rawSum)}</span></div>
+      ${isDelivery?`<div class="sr"><span>Доставка</span><span>${deliveryCost===0?'<span style=color:#3fbf38>Бесплатно</span>':formatPrice(deliveryCost)}</span></div>`:''}
+      <div class="sr total"><span>Итого</span><span>${formatPrice(total)}</span></div>
+    </div>
+
+    <button class="co-submit" onclick="confirmCheckout()">Подтвердить заказ — ${formatPrice(total)}</button>
+  `;
+
+  $("#checkoutBody").innerHTML = html;
+}
+
+function escHtml(s){return (s||"").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
+function setDeliveryType(t){state.deliveryType=t;saveState();if($("#cartContainer"))renderCart();if($("#checkoutBody").innerHTML)renderCheckoutForm();updateCounters();}
+function selectPickup(id){state.pickupPointId=id;saveState();renderCheckoutForm();}
+function selectTime(t){state.deliveryTime=t;saveState();renderCheckoutForm();}
+
+// Финальное подтверждение заказа
+function confirmCheckout(){
+  const rawSum = state.cart.reduce((s,it)=>{const d=DISHES.find(x=>x.id===it.id);return s+(d?d.price*it.qty:0);},0);
+  const isDelivery = state.deliveryType==="delivery";
+  const deliveryCost = isDelivery ? (rawSum >= DELIVERY_FREE_THRESHOLD ? 0 : DELIVERY_COST) : 0;
+  const total = rawSum + deliveryCost;
+
+  // Валидация
+  if(isDelivery && !state.deliveryAddress.trim()){
+    showToast("Укажите адрес доставки","warn");return;
+  }
+  if(!state.contactName.trim()){
+    showToast("Укажите ваше имя","warn");return;
+  }
+  if(!state.contactPhone.trim()){
+    showToast("Укажите телефон","warn");return;
+  }
+
+  const coalEarn = Math.floor(total*0.05);
   state.coal += coalEarn;
-  state.xp += Math.floor(sum/10);
-  state.totalOrdered += sum;
+  state.xp += Math.floor(total/10);
+  state.totalOrdered += total;
   state.roulettePlayed = false;
+
+  const deliveryInfo = isDelivery
+    ? {type:"delivery", address:state.deliveryAddress, building:state.deliveryBuilding, apartment:state.deliveryApartment, entrance:state.deliveryEntrance, floor:state.deliveryFloor, intercom:state.deliveryIntercom}
+    : {type:"pickup", pointId:state.pickupPointId, pointName:PICKUP_POINTS.find(p=>p.id===state.pickupPointId)?.name||""};
 
   if(!state.orderHistory) state.orderHistory = [];
   state.orderHistory.unshift({
     id:Date.now(),
     items:state.cart.map(it=>{const d=DISHES.find(x=>x.id===it.id);return{name:d.name,qty:it.qty,price:d.price};}),
-    total:sum,date:new Date().toISOString()
+    total:total,
+    date:new Date().toISOString(),
+    delivery:deliveryInfo,
+    time:state.deliveryTime,
+    contact:{name:state.contactName,phone:state.contactPhone},
+    comment:state.deliveryComment,
   });
   if(state.orderHistory.length>10) state.orderHistory=state.orderHistory.slice(0,10);
 
-  updateQuestsAfterOrder(sum);
+  updateQuestsAfterOrder(total);
   state.cart = [];
   state.activePromo = null;
   saveState();
   updateCounters();
   renderPassport();
-  showToast(`🎉 Заказ оформлен! +${coalEarn} 🔥 и +${Math.floor(sum/10)} XP`, "success");
+  closeCheckout();
+
+  const timeLabel = state.deliveryTime==="asap"?"Как можно скорее":state.deliveryTime;
+  const where = isDelivery ? `Доставка: ${state.deliveryAddress}` : `Самовывоз: ${PICKUP_POINTS.find(p=>p.id===state.pickupPointId)?.name||""}`;
+  showToast(`🎉 Заказ оформлен! ${where}. Время: ${timeLabel}. +${coalEarn}🔥 +${Math.floor(total/10)}XP`, "success");
   setTimeout(()=> showScreen("profile"), 900);
 }
 
@@ -1799,6 +2125,50 @@ function addCoalDemo(){
   showToast("🔥 +25 Угольков (демо)", "success");
 }
 
+function renderProfile(){
+  // Статистика
+  const orderCount = (state.orderHistory||[]).length;
+  $("#profileOrderCount").textContent = orderCount;
+
+  // Любимое блюдо
+  const freq = {};
+  (state.orderHistory||[]).forEach(o=>{
+    (o.items||[]).forEach(it=>{ freq[it.name]=(freq[it.name]||0)+it.qty; });
+  });
+  const fav = Object.entries(freq).sort((a,b)=>b[1]-a[1])[0];
+  $("#profileFav").textContent = fav ? fav[0] : "—";
+
+  // До следующего ранга
+  const nextRank = RANKS.find(r=>r.min>state.xp);
+  if(nextRank) $("#profileToNext").textContent = nextRank.min - state.xp;
+  else $("#profileToNext").textContent = "-max";
+
+  // История заказов
+  const hc = $("#historyContainer");
+  const orders = state.orderHistory||[];
+  if(orders.length===0){
+    hc.innerHTML = `<div style="padding:14px 16px;font-size:13px;color:var(--muted);">Пока нет заказов</div>`;
+    return;
+  }
+  hc.innerHTML = orders.map(o=>{
+    const d = new Date(o.date);
+    const dateStr = d.toLocaleDateString("ru-RU",{day:"numeric",month:"short"});
+    const itemNames = (o.items||[]).map(it=>`${it.name} ×${it.qty}`).join(", ");
+    const typeLabel = o.delivery?.type==="pickup"
+      ? `🚶 Самовывоз`
+      : `🚗 Доставка`;
+    const timeLabel = o.time==="asap"?"Как можно скорее":o.time;
+    return `
+      <div class="history-item">
+        <div>
+          <div class="h-name">${itemNames.length>40?itemNames.slice(0,40)+"…":itemNames}</div>
+          <div class="h-meta">${dateStr} · ${typeLabel} · ${timeLabel}</div>
+        </div>
+        <div class="h-sum">${formatPrice(o.total)}</div>
+      </div>`;
+  }).join("");
+}
+
 /* ============================================================
    ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
    ============================================================ */
@@ -1811,6 +2181,7 @@ function init(){
   setupCategories();
   drawWheel();
   renderPassport();
+  renderProfile();
   updateCounters();
   updateRoulette();
 
@@ -1841,6 +2212,17 @@ function init(){
 
   $("#winModal").addEventListener("click", e=>{
     if(e.target.id==="winModal") closeWinModal();
+  });
+
+  $("#checkoutOverlay").addEventListener("click", e=>{
+    if(e.target.id==="checkoutOverlay") closeCheckout();
+  });
+
+  document.addEventListener("keydown", e=>{
+    if(e.key==="Escape"){
+      if($("#checkoutOverlay").classList.contains("show")) closeCheckout();
+      else if($("#winModal").classList.contains("show")) closeWinModal();
+    }
   });
 
   if(!localStorage.getItem("vpz_visited")){
